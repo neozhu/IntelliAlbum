@@ -37,4 +37,12 @@ public class AppConfigurationSettings
     ///     Undocumented
     /// </summary>
     public bool Resilience { get; set; }
+    /// <summary>
+    /// Base folder for photographs.
+    /// </summary>
+    public string SourceDirectory { get; set; } = string.Empty;
+    /// <summary>
+    /// Thumbnail cache path (ignored if --syno specified)
+    /// </summary>
+    public string ThumbPath { get; set; }="./wwwroot/thumbs";
 }

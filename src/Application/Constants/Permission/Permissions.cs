@@ -5,6 +5,32 @@ namespace CleanArchitecture.Blazor.Application.Constants.Permission;
 
 public static class Permissions
 {
+    [DisplayName("Folders")]
+    [Description("Folders Permissions")]
+    public static class Folders
+    {
+        public const string View = "Permissions.Folders.View";
+        public const string Create = "Permissions.Folders.Create";
+        public const string Edit = "Permissions.Folders.Edit";
+        public const string Delete = "Permissions.Folders.Delete";
+        public const string Search = "Permissions.Folders.Search";
+        public const string Export = "Permissions.Folders.Export";
+        public const string Import = "Permissions.Folders.Import";
+    }
+    [DisplayName("Images")]
+    [Description("Images Permissions")]
+    public static class Images
+    {
+        public const string View = "Permissions.Images.View";
+        public const string Create = "Permissions.Images.Create";
+        public const string Edit = "Permissions.Images.Edit";
+        public const string Delete = "Permissions.Images.Delete";
+        public const string Search = "Permissions.Images.Search";
+        public const string Export = "Permissions.Images.Export";
+        public const string Import = "Permissions.Images.Import";
+    }
+
+
     [DisplayName("AuditTrails")]
     [Description("AuditTrails Permissions")]
     public static class AuditTrails

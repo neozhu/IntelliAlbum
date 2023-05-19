@@ -25,6 +25,7 @@ global using CleanArchitecture.Blazor.Application.Common.Models;
 global using CleanArchitecture.Blazor.Application.Common.Extensions;
 global using CleanArchitecture.Blazor.Application.Common.Interfaces;
 global using CleanArchitecture.Blazor.Application.Common.Interfaces.Caching;
+global using CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
 global using CleanArchitecture.Blazor.Domain.Entities.Audit;
 global using CleanArchitecture.Blazor.Application.Common.Specification;
 global using AutoFilterer.Attributes;

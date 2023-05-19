@@ -16,6 +16,9 @@ public interface IApplicationDbContext
     DbSet<Product> Products { get; set; }
     DbSet<Tenant> Tenants { get; set; }
     DbSet<Customer> Customers { get; set; }
+    //============================================
+    DbSet<Folder> Folders { get; set; }
+    DbSet<Image> Images { get; set; }
     ChangeTracker ChangeTracker { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

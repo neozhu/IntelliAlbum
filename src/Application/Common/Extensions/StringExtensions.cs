@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Humanizer;
 using System.Text;
 
 namespace CleanArchitecture.Blazor.Application.Common.Extensions;
@@ -27,5 +28,10 @@ public static class StringExtensions
             }
             return new string(stringBuffer);
         }
+    }
+
+    public static string ToHumanReadableString(this int timeMilliSecs)
+    {
+        return new TimeSpan(0, 0, 0, 0, timeMilliSecs).Humanize();
     }
 }

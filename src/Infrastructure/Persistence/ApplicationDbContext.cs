@@ -33,7 +33,9 @@ public class ApplicationDbContext : IdentityDbContext<
     public DbSet<KeyValue> KeyValues { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Product> Products { get; set; }
-
+    //===============================================
+    public DbSet<Folder> Folders { get; set; }
+    public DbSet<Image> Images { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

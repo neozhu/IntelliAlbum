@@ -15,16 +15,16 @@ public class MenuService : IMenuService
                 new() { Title = "Home", Icon = Icons.Material.Filled.Home, Href = "/" },
                 new()
                 {
-                    Title = "E-Commerce",
-                    Icon = Icons.Material.Filled.ShoppingCart,
+                    Title = "Album",
+                    Icon = Icons.Material.Filled.PhotoAlbum,
                     PageStatus = PageStatus.Completed,
                     IsParent = true,
                     MenuItems = new List<MenuSectionSubItemModel>
                     {
                         new()
                         {
-                            Title = "Products",
-                            Href = "/pages/products",
+                            Title = "Images",
+                            Href = "/pages/Images",
                             PageStatus = PageStatus.Completed
                         },
                         new()
@@ -35,30 +35,7 @@ public class MenuService : IMenuService
                         }
                     }
                 },
-                new()
-                {
-                    Title = "Analytics",
-                    Roles = new[] { RoleName.Administrator, RoleName.Users },
-                    Icon = Icons.Material.Filled.Analytics,
-                    Href = "/analytics",
-                    PageStatus = PageStatus.ComingSoon
-                },
-                new()
-                {
-                    Title = "Banking",
-                    Roles = new[] { RoleName.Administrator, RoleName.Users },
-                    Icon = Icons.Material.Filled.Money,
-                    Href = "/banking",
-                    PageStatus = PageStatus.ComingSoon
-                },
-                new()
-                {
-                    Title = "Booking",
-                    Roles = new[] { RoleName.Administrator, RoleName.Users },
-                    Icon = Icons.Material.Filled.CalendarToday,
-                    Href = "/booking",
-                    PageStatus = PageStatus.ComingSoon
-                }
+                 
             }
         },
         new MenuSectionModel
@@ -107,6 +84,12 @@ public class MenuService : IMenuService
                     Icon = Icons.Material.Filled.Devices,
                     MenuItems = new List<MenuSectionSubItemModel>
                     {
+                        new()
+                        {
+                            Title = "Folders",
+                            Href = "/pages/Folders",
+                            PageStatus = PageStatus.Completed
+                        },
                         new()
                         {
                             Title = "Picklist",
