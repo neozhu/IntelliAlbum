@@ -28,5 +28,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         {
             return $"{Name} [{Id}]";
         }
+
+        
     }
 }
