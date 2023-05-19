@@ -1,6 +1,7 @@
 using Blazor.Server.UI;
 using Blazor.Server.UI.Services.Notifications;
 using CleanArchitecture.Blazor.Application;
+using CleanArchitecture.Blazor.Application.Features.Folders.Services;
 using CleanArchitecture.Blazor.Infrastructure;
 using CleanArchitecture.Blazor.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http.Connections;
@@ -34,6 +35,10 @@ if (app.Environment.IsDevelopment())
         {
             inMemoryNotificationService.Preload();
         }
+        scope.ServiceProvider.GetRequiredService<WorkService>().StartService();
+        scope.ServiceProvider.GetRequiredService<IndexingService>().StartService();
+        //scope.ServiceProvider.GetRequiredService<IndexingService>().IndexFolder(new DirectoryInfo("C:\\Users\\neo_z\\Pictures"), null);
+
     }
 }
 else

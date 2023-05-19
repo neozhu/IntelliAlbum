@@ -5,6 +5,7 @@ using CleanArchitecture.Blazor.Application.Common.Behaviours;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
 using CleanArchitecture.Blazor.Application.Common.PublishStrategies;
 using CleanArchitecture.Blazor.Application.Common.Security;
+using CleanArchitecture.Blazor.Application.Features.Folders.Services;
 using CleanArchitecture.Blazor.Application.Services.MultiTenant;
 using CleanArchitecture.Blazor.Application.Services.Picklist;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,7 +49,46 @@ public static class DependencyInjection
             return service;
         });
         services.AddScoped<RegisterFormModelFluentValidator>();
+
+        services.AddImageServices();
+        services.AddSingletonBackEndServices();
         return services;
     }
-   
+    public static IServiceCollection AddSingletonBackEndServices(this IServiceCollection services)
+    {
+        //services.AddSingleton<StatisticsService>();
+        //services.AddSingleton<ConfigService>();
+        //services.AddSingleton<ObjectDetector>();
+        services.AddSingleton<FolderWatcherService>();
+        services.AddSingleton<IndexingService>();
+        //services.AddSingleton<MetaDataService>();
+        //services.AddSingleton<ThumbnailService>();
+        //services.AddSingleton<ExifService>();
+        services.AddSingleton<FolderService>();
+        //services.AddSingleton<ThemeService>();
+        //services.AddSingleton<ImageRecognitionService>();
+        //services.AddSingleton<ImageCache>();
+        services.AddSingleton<WorkService>();
+        //services.AddSingleton<CachedDataService>();
+        //services.AddSingleton<TaskService>();
+        //services.AddSingleton<RescanService>();
+        services.AddSingleton<ServerNotifierService>();
+        services.AddSingleton<ServerStatusService>();
+        //services.AddSingleton<DownloadService>();
+
+        services.AddSingleton<IStatusService>(x => x.GetRequiredService<ServerStatusService>());
+        services.AddSingleton<IFolderService>(x => x.GetRequiredService<FolderService>());
+        services.AddSingleton<IWorkService>(x => x.GetRequiredService<WorkService>());
+
+
+       
+
+        return services;
+    }
+    public static IServiceCollection AddImageServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<ImageProcessorFactory>()
+            .AddSingleton<IImageProcessorFactory>(x => x.GetRequiredService<ImageProcessorFactory>())
+            .AddSingleton<ImageProcessService>();
+    }
 }

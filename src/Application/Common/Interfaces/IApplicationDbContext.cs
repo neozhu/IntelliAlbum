@@ -4,6 +4,7 @@
 
 using CleanArchitecture.Blazor.Domain.Entities.Logger;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
 
 namespace CleanArchitecture.Blazor.Application.Common.Interfaces;
 

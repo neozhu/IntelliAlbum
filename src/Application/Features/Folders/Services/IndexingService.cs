@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ILogger = Serilog.ILogger;
+using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
+
 namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
 
 public class IndexingService : IProcessJobFactory, IRescanProvider
@@ -167,7 +169,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
             if (folderToScan == null)
             {
                 _logger.LogInformation("Scanning new folder: {0}\\{1}", folder.Parent.Name, folder.Name);
-                folderToScan = new Folder { Path = folder.FullName };
+                folderToScan = new Folder { Path = folder.FullName , Name=Path.GetFileName(folder.FullName) };
             }
             else
             {

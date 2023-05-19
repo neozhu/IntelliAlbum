@@ -3,8 +3,11 @@
 using CleanArchitecture.Blazor.Application.Common.Utils;
 
 namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
-
-public class FolderService
+/// <summary>
+///     Service to load all of the folders monitored by Damselfly, and present
+///     them as a single collection to the UI.
+/// </summary>
+public class FolderService : IFolderService
 {
     private readonly IApplicationDbContext _context;
     private readonly ILogger<FolderService> _logger;

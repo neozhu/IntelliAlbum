@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ILogger = Serilog.ILogger;
 using XmpCore;
+using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
+
 namespace CleanArchitecture.Blazor.Application.Common.Utils;
 public static class SidecarUtils
 {

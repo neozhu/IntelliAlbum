@@ -3,6 +3,8 @@
 
 using CleanArchitecture.Blazor.Application.Features.Folders.DTOs;
 using System.ComponentModel;
+using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
+
 namespace CleanArchitecture.Blazor.Application.Features.Images.DTOs;
 
 [Description("Images")]

@@ -3,6 +3,7 @@
 
 using CleanArchitecture.Blazor.Application.Features.Images.DTOs;
 using CleanArchitecture.Blazor.Application.Features.Images.Caching;
+using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
 
 namespace CleanArchitecture.Blazor.Application.Features.Images.Queries.Pagination;
 
