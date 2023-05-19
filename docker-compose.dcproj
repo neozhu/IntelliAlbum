@@ -1,0 +1,34 @@
+﻿
+<Project ToolsVersion="15.0" Sdk="Microsoft.Docker.Sdk">
+  <PropertyGroup Label="Globals">
+    <ProjectVersion>2.1</ProjectVersion>
+    <DockerTargetOS>Linux</DockerTargetOS>
+    <ProjectGuid>6bd2ec46-fa8f-44f3-af33-903bbb347116</ProjectGuid>
+    <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
+    <DockerServiceName>dashboard</DockerServiceName>
+    <UserSecretsId>c2a88436-9d6a-4e45-9717-475eb7b1e87d</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="docker-compose.yml" />
+    <None Include="docker-compose.override.yml" />
+    <None Include=".dockerignore" />
+    <None Include="src\Blazor.Server.UI\Pages\Identity\Users\Users.razor.cs" />
+    <None Include="src\Blazor.Server.UI\Shared\UserLoginState.razor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="launchSettings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="launchSettings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="launchSettings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="src\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Blazor.Server.UI\Pages\Identity\Users\Profile.razor.cs" />
+  </ItemGroup>
+</Project>
