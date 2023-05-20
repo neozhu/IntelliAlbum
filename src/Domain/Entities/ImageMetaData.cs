@@ -44,9 +44,9 @@ public class ImageMetaData
     // Date we last performed face/object/image recognition
     // If this is null, AI will be reprocessed
     public DateTime? AILastUpdated { get; set; }
-    public List<DirectoryBase> Directories { get; set; }=new();
+    public virtual List<DirectoryBase> EXIFData { get; set; } = new();
 
-    }
+}
 
     public class Camera
     {

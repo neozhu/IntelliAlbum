@@ -14,9 +14,9 @@ public class ImageConfiguration : IEntityTypeConfiguration<Image>
     {
         builder.OwnsOne(x => x.MetaData, b => {
             b.ToJson();
-            b.OwnsMany(d => d.Directories, db => db.ToJson());
-            b.OwnsOne(d => d.Lens, db => db.ToJson());
-            b.OwnsOne(d => d.Camera, db => db.ToJson());
+            b.OwnsMany(d => d.EXIFData);
+            b.OwnsOne(d => d.Lens);
+            b.OwnsOne(d => d.Camera);
             });
         builder.OwnsOne(x => x.Hash, b => b.ToJson());
         builder.OwnsMany(x => x.Classification, b => b.ToJson());
@@ -31,6 +31,9 @@ public class ImageConfiguration : IEntityTypeConfiguration<Image>
         builder.HasOne(x => x.Folder).WithMany(x => x.Images).HasForeignKey(x => x.FolderId).IsRequired();
 
         builder.Ignore(e => e.DomainEvents);
+        builder.Ignore(e => e.DownloadImageUrl);
+        builder.Ignore(e => e.RawImageUrl);
+        builder.Ignore(e => e.FullPath);
     }
 }
 

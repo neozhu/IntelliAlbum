@@ -4,6 +4,7 @@ using CleanArchitecture.Blazor.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CleanArchitecture.Blazor.Migrators.MSSQL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230520060637_EXIFData")]
+    partial class EXIFData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -722,6 +725,31 @@ namespace CleanArchitecture.Blazor.Migrators.MSSQL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsMany("CleanArchitecture.Blazor.Domain.Entities.DirectoryBase", "EXIFData", b1 =>
+                        {
+                            b1.Property<int>("ImageId")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Description")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Name")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("ImageId", "Id");
+
+                            b1.ToTable("Images");
+
+                            b1.ToJson("EXIFData");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ImageId");
+                        });
+
                     b.OwnsOne("CleanArchitecture.Blazor.Domain.Entities.Hash", "Hash", b1 =>
                         {
                             b1.Property<int>("ImageId")
@@ -898,28 +926,7 @@ namespace CleanArchitecture.Blazor.Migrators.MSSQL.Migrations
 
                                     b2.ToTable("Images");
 
-                                    b2.WithOwner()
-                                        .HasForeignKey("ImageMetaDataImageId");
-                                });
-
-                            b1.OwnsMany("CleanArchitecture.Blazor.Domain.Entities.DirectoryBase", "EXIFData", b2 =>
-                                {
-                                    b2.Property<int>("ImageMetaDataImageId")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
-
-                                    b2.Property<string>("Description")
-                                        .HasColumnType("nvarchar(max)");
-
-                                    b2.Property<string>("Name")
-                                        .HasColumnType("nvarchar(max)");
-
-                                    b2.HasKey("ImageMetaDataImageId", "Id");
-
-                                    b2.ToTable("Images");
+                                    b2.ToJson("Camera");
 
                                     b2.WithOwner()
                                         .HasForeignKey("ImageMetaDataImageId");
@@ -943,13 +950,13 @@ namespace CleanArchitecture.Blazor.Migrators.MSSQL.Migrations
 
                                     b2.ToTable("Images");
 
+                                    b2.ToJson("Lens");
+
                                     b2.WithOwner()
                                         .HasForeignKey("ImageMetaDataImageId");
                                 });
 
                             b1.Navigation("Camera");
-
-                            b1.Navigation("EXIFData");
 
                             b1.Navigation("Lens");
                         });
@@ -1022,6 +1029,8 @@ namespace CleanArchitecture.Blazor.Migrators.MSSQL.Migrations
                         });
 
                     b.Navigation("Classification");
+
+                    b.Navigation("EXIFData");
 
                     b.Navigation("Folder");
 

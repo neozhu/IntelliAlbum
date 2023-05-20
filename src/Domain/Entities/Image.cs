@@ -1,5 +1,8 @@
 ﻿
 
+using System.ComponentModel.DataAnnotations.Schema;
+using static System.Net.Mime.MediaTypeNames;
+
 namespace CleanArchitecture.Blazor.Domain.Entities
 {
     public class Image: BaseAuditableEntity
@@ -16,14 +19,25 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         // Date used for search query orderby
         public DateTime? RecentlyViewDatetime { get; set; }
 
-        public virtual ImageMetaData MetaData { get; set; } = new();
+        public virtual ImageMetaData? MetaData { get; set; }
+      
         public virtual Hash Hash { get; set; } = new();
         // An image can have many tags
-        public virtual List<Tag> ImageTags { get; init; } = new();
+        public virtual List<Tag>? ImageTags { get; set; }
 
-        public virtual List<ImageClassification> Classification { get; init; } = new();
-        public virtual List<ImageObject> ImageObjects { get; init; } = new();
+        public virtual List<ImageClassification>? Classification { get; set; }
+        public virtual List<ImageObject>? ImageObjects { get; set; }
 
+        [NotMapped]
+        public string FullPath => Path.Combine(Folder.Path, Name);
+        [NotMapped]
+        public string RawImageUrl => $"/rawimage/{Id}";
+        [NotMapped]
+        public string DownloadImageUrl => $"/dlimage/{Id}";
+        public string ThumbUrl(ThumbSize size)
+        {
+            return $"/thumb/{size}/{Id}?nocache={this?.FileLastModDate:yyyyMMddHHmmss}";
+        }
         public override string ToString()
         {
             return $"{Name} [{Id}]";

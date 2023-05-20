@@ -61,7 +61,7 @@ public static class DependencyInjection
         //services.AddSingleton<ObjectDetector>();
         services.AddSingleton<FolderWatcherService>();
         services.AddSingleton<IndexingService>();
-        //services.AddSingleton<MetaDataService>();
+        services.AddSingleton<MetaDataService>();
         //services.AddSingleton<ThumbnailService>();
         //services.AddSingleton<ExifService>();
         services.AddSingleton<FolderService>();

@@ -16,6 +16,7 @@ namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
 public class IndexingService : IProcessJobFactory, IRescanProvider
 {
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly MetaDataService _metaDataService;
     private readonly ServiceSettings _settings;
     private readonly ILogger<IndexingService> _logger;
     private readonly WorkService _workService;
@@ -26,6 +27,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
     public  string RootFolder { get; set; }
     public  bool EnableIndexing { get; set; } 
     public IndexingService(IServiceScopeFactory scopeFactory,
+        MetaDataService metaDataService,
          ServiceSettings settings,
         ILogger<IndexingService> logger,
         WorkService workService,
@@ -35,6 +37,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
     {
 
         _scopeFactory = scopeFactory;
+        _metaDataService = metaDataService;
         _settings = settings;
         _logger = logger;
         _workService = workService;
@@ -330,7 +333,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                 if (dbImage != null)
                 {
                     // See if the image has changed since we last indexed it
-                    var fileChanged = file.FileIsMoreRecentThan(dbImage.LastModified.Value);
+                    var fileChanged = file.FileIsMoreRecentThan(dbImage.FileLastModDate);
 
                     if (!fileChanged)
                     {
@@ -352,7 +355,6 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                 var image = dbImage;
 
                 if (image == null) image = new Image { Name = file.Name };
-
                 // Store some info about the disk file
                 image.FileSizeBytes = (int)file.Length;
                 image.FileCreationDate = file.CreationTimeUtc;
@@ -374,6 +376,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                         newImages++;
                     }
                     imagesWereAddedOrRemoved = true;
+                    image.MetaData = _metaDataService.ReadImageMetaData(image);
                 }
                 else
                 {
