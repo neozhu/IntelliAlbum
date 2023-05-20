@@ -106,8 +106,9 @@ public class WorkService : IWorkService
     /// </summary>
     private async void ProcessJobs()
     {
-        var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
-        while (await timer.WaitForNextTickAsync())
+        //var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+        //while (await timer.WaitForNextTickAsync())
+        while (true)
         {
             var cpuPercentage = _cpuSettings.CurrentCPULimit;
 

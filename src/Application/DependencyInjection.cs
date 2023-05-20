@@ -62,7 +62,7 @@ public static class DependencyInjection
         services.AddSingleton<FolderWatcherService>();
         services.AddSingleton<IndexingService>();
         services.AddSingleton<MetaDataService>();
-        //services.AddSingleton<ThumbnailService>();
+        services.AddSingleton<ThumbnailService>();
         //services.AddSingleton<ExifService>();
         services.AddSingleton<FolderService>();
         //services.AddSingleton<ThemeService>();
@@ -81,7 +81,7 @@ public static class DependencyInjection
         services.AddSingleton<IWorkService>(x => x.GetRequiredService<WorkService>());
 
 
-       
+
 
         return services;
     }

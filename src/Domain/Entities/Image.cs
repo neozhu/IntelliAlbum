@@ -28,6 +28,9 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public virtual List<ImageClassification>? Classification { get; set; }
         public virtual List<ImageObject>? ImageObjects { get; set; }
 
+        public DateTime? ThumbLastUpdated { get; set; }
+        public virtual List<ThumbImage>? ThumbImages { get; set; }
+
         [NotMapped]
         public string FullPath => Path.Combine(Folder.Path, Name);
         [NotMapped]

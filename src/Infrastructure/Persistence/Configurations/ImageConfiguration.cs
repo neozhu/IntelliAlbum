@@ -26,6 +26,7 @@ public class ImageConfiguration : IEntityTypeConfiguration<Image>
             
             });
         builder.OwnsMany(x => x.ImageTags, b => b.ToJson());
+        builder.OwnsMany(x => x.ThumbImages, b => b.ToJson());
         builder.Property(t => t.Name).HasMaxLength(250).IsRequired();
 
         builder.HasOne(x => x.Folder).WithMany(x => x.Images).HasForeignKey(x => x.FolderId).IsRequired();

@@ -50,11 +50,8 @@ public class FolderWatcherService
         // Process the queue every 30s
         var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
 
-        while (true)
+        while (await timer.WaitForNextTickAsync())
         {
-            // Wait until the next iteration
-            await timer.WaitForNextTickAsync();
-
             // First, take all the queued folder changes and persist them to the DB
             // by setting the FolderScanDate to null.
             var folders = new List<string>();
@@ -102,8 +99,8 @@ public class FolderWatcherService
 
                 // Watch for changes in LastAccess and LastWrite
                 // times, and the renaming of files.
-                watcher.NotifyFilter =  NotifyFilters.FileName
-                                        | NotifyFilters.DirectoryName;
+                watcher.NotifyFilter = NotifyFilters.LastWrite;
+                                      
 
                 // Add event handlers.
                 watcher.Changed += OnChanged;
@@ -148,11 +145,7 @@ public class FolderWatcherService
     /// <param name="changeType"></param>
     private void EnqueueFolderChangeForRescan(FileInfo file, WatcherChangeTypes changeType)
     {
-        using var scope = _scopeFactory.CreateScope();
-        var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
         var folder = file.Directory.FullName;
-
         // If it's hidden, or already in the queue, ignore it.
         if ((file.IsHidden() && changeType != WatcherChangeTypes.Deleted) || folderQueue.Contains(folder))
             return;

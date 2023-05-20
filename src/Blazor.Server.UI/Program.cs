@@ -37,7 +37,7 @@ if (app.Environment.IsDevelopment())
         }
         scope.ServiceProvider.GetRequiredService<WorkService>().StartService();
         scope.ServiceProvider.GetRequiredService<IndexingService>().StartService();
-        //scope.ServiceProvider.GetRequiredService<IndexingService>().IndexFolder(new DirectoryInfo("C:\\Users\\neo_z\\Pictures"), null);
+        var thumbService = scope.ServiceProvider.GetRequiredService<ThumbnailService>();
 
     }
 }

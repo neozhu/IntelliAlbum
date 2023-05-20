@@ -490,11 +490,15 @@ public class MetaDataService
             if (width == 0 || height == 0)
             {
                 var subIfdDirectory = metadata.OfType<ExifSubIfdDirectory>().FirstOrDefault();
-
                 width = jpegDirectory.SafeGetExifInt(ExifDirectoryBase.TagExifImageWidth);
                 height = jpegDirectory.SafeGetExifInt(ExifDirectoryBase.TagExifImageHeight);
             }
         }
+    }
+    public static void GetImageSize(ImageMetaData imageMetaData, out int width, out int height)
+    {
+       width = imageMetaData.Width;
+       height = imageMetaData.Height;
     }
 
 }

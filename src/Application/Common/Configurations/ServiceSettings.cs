@@ -28,5 +28,6 @@ public class ServiceSettings
     /// Generate Thumbnails
     /// </summary>
     public bool GenerateThumbnails { get; set; }
+  
 }
 
