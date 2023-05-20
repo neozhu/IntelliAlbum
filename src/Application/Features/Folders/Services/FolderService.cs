@@ -1,6 +1,7 @@
 ﻿
 
 using CleanArchitecture.Blazor.Application.Common.Utils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
 /// <summary>
@@ -9,17 +10,25 @@ namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
 /// </summary>
 public class FolderService : IFolderService
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IndexingService _indexingService;
+    private readonly ServerNotifierService _notifier;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<FolderService> _logger;
     private readonly EventConflator conflator = new(10 * 1000);
     private List<Folder> allFolders = new();
     public FolderService(
-        IApplicationDbContext context,
+        IndexingService indexingService, 
+        ServerNotifierService notifier,
+        IServiceScopeFactory scopeFactory,
         ILogger<FolderService> logger
         )
     {
-        _context = context;
+        _indexingService = indexingService;
+        _notifier = notifier;
+        _scopeFactory = scopeFactory;
         _logger = logger;
+        // After we've loaded the data, start listening
+        _indexingService.OnFoldersChanged += OnFoldersChanged;
         // Initiate pre-loading the folders.
         _ = LoadFolders();
     }
@@ -31,12 +40,15 @@ public class FolderService : IFolderService
     }
     public async Task LoadFolders()
     {
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
         var watch = new Stopwatch("GetFolders");
         _logger.LogInformation("Loading folder data...");
         try
         {
-            allFolders = await _context.Folders
+            allFolders = await db.Folders
                 .Include(x => x.Children)
+                .Select(x => CreateFolderWrapper(x, x.Images.Count, x.Images.Max(i => i.RecentlyViewDatetime)))
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -62,7 +74,7 @@ public class FolderService : IFolderService
 
         OnChange?.Invoke();
 
-        //_ = _notifier.NotifyClients(NotificationType.FoldersChanged);
+        _ = _notifier.NotifyClients(NotificationType.FoldersChanged);
     }
 
 

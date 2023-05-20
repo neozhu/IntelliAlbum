@@ -104,9 +104,10 @@ public class WorkService : IWorkService
     ///     problems (although we could perhaps allow that when a
     ///     DB like PostGres is in use. For SQLite, definitely not.
     /// </summary>
-    private void ProcessJobs()
+    private async void ProcessJobs()
     {
-        while (true)
+        var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+        while (await timer.WaitForNextTickAsync())
         {
             var cpuPercentage = _cpuSettings.CurrentCPULimit;
 

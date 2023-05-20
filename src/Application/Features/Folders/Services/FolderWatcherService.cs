@@ -37,6 +37,10 @@ public class FolderWatcherService
         // Start a thread which will periodically drain the queue
         _queueTask = Task.Run(FolderQueueProcessor);
     }
+    public void LinkIndexingServiceInstance(IndexingService indexingService)
+    {
+        _indexingService = indexingService;
+    }
     /// <summary>
     ///     Processor to drain the folder queue and update the DB. This
     /// </summary>
@@ -79,10 +83,7 @@ public class FolderWatcherService
         }
     }
 
-    public void LinkIndexingServiceInstance(IndexingService indexingService)
-    {
-        _indexingService = indexingService;
-    }
+
 
 
     public void CreateFileWatcher(DirectoryInfo path)
@@ -101,10 +102,8 @@ public class FolderWatcherService
 
                 // Watch for changes in LastAccess and LastWrite
                 // times, and the renaming of files.
-                watcher.NotifyFilter = NotifyFilters.LastWrite
-                                       | NotifyFilters.FileName
-                                       | NotifyFilters.Size
-                                       | NotifyFilters.DirectoryName;
+                watcher.NotifyFilter =  NotifyFilters.FileName
+                                        | NotifyFilters.DirectoryName;
 
                 // Add event handlers.
                 watcher.Changed += OnChanged;
@@ -155,7 +154,7 @@ public class FolderWatcherService
         var folder = file.Directory.FullName;
 
         // If it's hidden, or already in the queue, ignore it.
-        if (file.IsHidden() || folderQueue.Contains(folder))
+        if ((file.IsHidden() && changeType != WatcherChangeTypes.Deleted) || folderQueue.Contains(folder))
             return;
 
         // Ignore non images, and hidden files/folders.

@@ -1,4 +1,5 @@
-﻿using CleanArchitecture.Blazor.Application.Common.Interfaces;
+﻿using CleanArchitecture.Blazor.Application.Common.Configurations;
+using CleanArchitecture.Blazor.Application.Common.Interfaces;
 using CleanArchitecture.Blazor.Application.Common.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -15,15 +16,17 @@ namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
 public class IndexingService : IProcessJobFactory, IRescanProvider
 {
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ServiceSettings _settings;
     private readonly ILogger<IndexingService> _logger;
     private readonly WorkService _workService;
     private readonly ImageProcessService _imageProcessService;
     private readonly FolderWatcherService _watcherService;
     private readonly IStatusService _statusService;
     private bool _fullIndexComplete;
-    public static string RootFolder { get; set; }
-    public static bool EnableIndexing { get; set; } = true;
+    public  string RootFolder { get; set; }
+    public  bool EnableIndexing { get; set; } 
     public IndexingService(IServiceScopeFactory scopeFactory,
+         ServiceSettings settings,
         ILogger<IndexingService> logger,
         WorkService workService,
         ImageProcessService imageService,
@@ -32,11 +35,17 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
     {
 
         _scopeFactory = scopeFactory;
+        _settings = settings;
         _logger = logger;
         _workService = workService;
         _imageProcessService = imageService;
         _watcherService = watcherService;
         _statusService = statusService;
+        RootFolder = _settings.SourceDirectory;
+        EnableIndexing = _settings.EnableIndexing;
+
+        // Slight hack to work around circular dependencies
+        _watcherService.LinkIndexingServiceInstance(this);
     }
     public JobPriorities Priority => JobPriorities.Indexing;
     public async Task<ICollection<IProcessJob>> GetPendingJobs(int maxCount)
@@ -359,8 +368,11 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                     image.RecentlyViewDatetime = image.FileCreationDate.ToUniversalTime();
 
                     _logger.LogTrace("Adding new image {0}", image.Name);
-                    dbFolder.Images.Add(image);
-                    newImages++;
+                    if (!dbFolder.Images.Any(x => x.Name.Equals(image.Name, StringComparison.CurrentCultureIgnoreCase)))
+                    {
+                        dbFolder.Images.Add(image);
+                        newImages++;
+                    }
                     imagesWereAddedOrRemoved = true;
                 }
                 else
