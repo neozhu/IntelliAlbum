@@ -45,7 +45,9 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         {
             return $"{Name} [{Id}]";
         }
-
+        public int ProcessThumbStatus { get; set; }
+        public int DetectObjectStatus { get; set; }
+        public int VerifyFaceStatus { get; set; }
         
     }
 }
