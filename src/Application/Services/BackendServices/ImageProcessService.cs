@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 /// <summary>
 ///     Abstraction over the different image processing libraries.
 ///     In testing, SkiaSharp was shown to be significantly faster

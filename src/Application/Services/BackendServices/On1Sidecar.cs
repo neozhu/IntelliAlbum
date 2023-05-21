@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ILogger = Serilog.ILogger;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class MetaData
 {
     public List<string> Keywords { get; set; }

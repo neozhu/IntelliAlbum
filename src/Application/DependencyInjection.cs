@@ -5,10 +5,11 @@ using CleanArchitecture.Blazor.Application.Common.Behaviours;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
 using CleanArchitecture.Blazor.Application.Common.PublishStrategies;
 using CleanArchitecture.Blazor.Application.Common.Security;
-using CleanArchitecture.Blazor.Application.Features.Folders.Services;
+using  CleanArchitecture.Blazor.Application.BackendServices;
 using CleanArchitecture.Blazor.Application.Services.MultiTenant;
 using CleanArchitecture.Blazor.Application.Services.Picklist;
 using Microsoft.Extensions.DependencyInjection;
+using CleanArchitecture.Blazor.Application.Services.BackendServices;
 
 namespace CleanArchitecture.Blazor.Application;
 
@@ -67,7 +68,7 @@ public static class DependencyInjection
         services.AddSingleton<FolderService>();
         //services.AddSingleton<ThemeService>();
         //services.AddSingleton<ImageRecognitionService>();
-        //services.AddSingleton<ImageCache>();
+        services.AddSingleton<ImageCache>();
         services.AddSingleton<WorkService>();
         //services.AddSingleton<CachedDataService>();
         //services.AddSingleton<TaskService>();
@@ -76,6 +77,7 @@ public static class DependencyInjection
         services.AddSingleton<ServerStatusService>();
         //services.AddSingleton<DownloadService>();
 
+        services.AddSingleton<IImageCacheService>(x => x.GetRequiredService<ImageCache>());
         services.AddSingleton<IStatusService>(x => x.GetRequiredService<ServerStatusService>());
         services.AddSingleton<IFolderService>(x => x.GetRequiredService<FolderService>());
         services.AddSingleton<IWorkService>(x => x.GetRequiredService<WorkService>());

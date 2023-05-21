@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class ImageProcessResult : IImageProcessResult
 {
     public bool ThumbsGenerated { get; set; }

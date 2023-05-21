@@ -22,7 +22,7 @@ using ILogger = Serilog.ILogger;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp.Drawing.Processing;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class ImageSharpProcessor : IImageProcessor, IHashProvider
 {
     private static readonly ILogger Logging = Log.ForContext(typeof(SkiaSharpProcessor));

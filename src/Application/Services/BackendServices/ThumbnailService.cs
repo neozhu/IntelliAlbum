@@ -1,5 +1,6 @@
 ﻿using CleanArchitecture.Blazor.Application.Common.Configurations;
 using CleanArchitecture.Blazor.Application.Common.Utils;
+using CleanArchitecture.Blazor.Application.Services.BackendServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
 using Stopwatch = CleanArchitecture.Blazor.Application.Common.Utils.Stopwatch;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class ThumbnailService : IProcessJobFactory, IRescanProvider
 {
     private const string _requestRoot = "/images";
@@ -402,6 +403,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
         // Mark the image as done, so that if anything goes wrong it won't go into an infinite loop spiral
         sourceImage.ThumbLastUpdated = DateTime.UtcNow;
         var result = await ConvertFile(sourceImage, forceRegeneration);
+        //_imageCache.Evict(sourceImage.Id);
         return result;
     }
 
@@ -429,7 +431,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
     /// <param name="image"></param>
     /// <param name="processResult"></param>
     /// <returns></returns>
-    public async Task AddHashToImage(Image image, IImageProcessResult processResult)
+    public Task AddHashToImage(Image image, IImageProcessResult processResult)
     {
         try
         {
@@ -443,12 +445,13 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                 image.Hash.PerceptualHex3 = chunks[2];
                 image.Hash.PerceptualHex4 = chunks[3];
             }
-             
+            
         }
         catch (Exception ex)
         {
             _logger.LogError($"Exception during perceptual hash calc: {ex}");
         }
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -641,7 +644,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                             $"{destFiles.Count()} thumbs created for {imagePath} in {watch.HumanElapsedTime}");
                     }
 
-                    if (result.ThumbsGenerated)
+                    if (result!=null && result.ThumbsGenerated)
                     {
                         // Generate the perceptual hash from the large thumbnail.
                         var largeThumbPath = GetThumbPath(imagePath, ThumbSize.Large);

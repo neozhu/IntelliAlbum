@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 
 public enum JobPriorities
 {

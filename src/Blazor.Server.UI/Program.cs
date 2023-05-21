@@ -1,7 +1,8 @@
 using Blazor.Server.UI;
 using Blazor.Server.UI.Services.Notifications;
 using CleanArchitecture.Blazor.Application;
-using CleanArchitecture.Blazor.Application.Features.Folders.Services;
+using CleanArchitecture.Blazor.Application.BackendServices;
+using CleanArchitecture.Blazor.Application.Services.BackendServices;
 using CleanArchitecture.Blazor.Infrastructure;
 using CleanArchitecture.Blazor.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http.Connections;
@@ -44,6 +45,9 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+// Prime the cache
+app.Services.GetRequiredService<ImageCache>().WarmUp().Wait();
+
 var workservice = app.Services.GetRequiredService<WorkService>();
 workservice.StartService();
 var indexservice = app.Services.GetRequiredService<IndexingService>();

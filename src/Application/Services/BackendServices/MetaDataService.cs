@@ -17,7 +17,7 @@ using ImageProcessingException = MetadataExtractor.ImageProcessingException;
 using Tag = CleanArchitecture.Blazor.Domain.Entities.Tag;
 using MetadataExtractor.Formats.Mpeg;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class MetaDataService
 {
     private readonly ILogger<MetaDataService> _logger;

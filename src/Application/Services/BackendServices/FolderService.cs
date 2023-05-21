@@ -3,7 +3,7 @@
 using CleanArchitecture.Blazor.Application.Common.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 /// <summary>
 ///     Service to load all of the folders monitored by Damselfly, and present
 ///     them as a single collection to the UI.

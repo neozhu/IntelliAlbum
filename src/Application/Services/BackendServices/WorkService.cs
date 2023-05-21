@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class WorkService : IWorkService
 {
 #if DEBUG
@@ -104,10 +104,8 @@ public class WorkService : IWorkService
     ///     problems (although we could perhaps allow that when a
     ///     DB like PostGres is in use. For SQLite, definitely not.
     /// </summary>
-    private async void ProcessJobs()
+    private  void ProcessJobs()
     {
-        //var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
-        //while (await timer.WaitForNextTickAsync())
         while (true)
         {
             var cpuPercentage = _cpuSettings.CurrentCPULimit;

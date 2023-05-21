@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static CleanArchitecture.Blazor.Application.Features.Folders.Services.IndexingService;
+using static CleanArchitecture.Blazor.Application.BackendServices.IndexingService;
 using ILogger = Serilog.ILogger;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 
 public class FolderWatcherService
 {
@@ -58,7 +58,7 @@ public class FolderWatcherService
         {
             // First, take all the queued folder changes and persist them to the DB
             // by setting the FolderScanDate to null.
-            var folders = new List<string>();
+            var folders = new HashSet<string>();
 
             while (folderQueue.TryDequeue(out var folder))
             {
@@ -70,7 +70,7 @@ public class FolderWatcherService
             {
 
                 using var scope = _scopeFactory.CreateScope();
-                var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
+                var db = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
                 var uniqueFolders = folders.Distinct(StringComparer.OrdinalIgnoreCase);
                 var pendingFolders = await db.Folders.Where(f => uniqueFolders.Contains(f.Path))
                     .Select(x => x.Path)
@@ -79,8 +79,8 @@ public class FolderWatcherService
                 // Call this method synchronously, we don't want to continue otherwise
                 // we'll end up with race conditions as the timer triggers while
                 // the method is completing. 
-                //await _indexingService.MarkFoldersForScan(pendingFolders);
-                foreach(var folder in pendingFolders)
+                //_indexingService.MarkFoldersForScan(pendingFolders).Wait();
+                foreach (var folder in pendingFolders)
                 {
                     _workService.AddJob(new IndexProcess
                     {
@@ -89,7 +89,7 @@ public class FolderWatcherService
                         Name = "Indexing"
                     });
                 }
-                 
+
                 await Task.Delay(10);
             }
         }

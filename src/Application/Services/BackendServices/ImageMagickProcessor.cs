@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ILogger = Serilog.ILogger;
 
-namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
+namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class ImageMagickProcessor : IImageProcessor
 {
     private const string imageMagickExe = "convert";
