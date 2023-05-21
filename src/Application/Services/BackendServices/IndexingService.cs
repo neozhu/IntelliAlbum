@@ -63,19 +63,20 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
             var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
 
             // Now, see if there's any folders that have a null scan date.
-            var folders = await db.Folders.Where(x => x.FolderScanDate == null)
+            var folders = await db.Folders.Where(x => x.FolderScanDate == null && x.ProcessStatus==0)
                 .OrderBy(x => x.Path)
+                .Select(x=>x.Path)
                 .Take(maxCount)
-                .ToArrayAsync();
+                .ToListAsync();
 
             var jobs = folders.Select(x => new IndexProcess
             {
-                Path = new DirectoryInfo(x.Path),
+                Path = new DirectoryInfo(x),
                 Service = this,
                 Name = "Indexing"
             })
                 .ToArray();
-
+            await db.Folders.Where(x => folders.Contains(x.Path)).ExecuteUpdateAsync(x => x.SetProperty(y => y.ProcessStatus, v => 1));
             return jobs;
         }
         // We always perform a full index at startup. This checks the
@@ -417,6 +418,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
 
         // Flag/update the folder to say we've processed it
         dbFolder.FolderScanDate = DateTime.UtcNow;
+        dbFolder.ProcessStatus = 2;
         db.Folders.Update(dbFolder);
 
         await db.SaveChangesAsync(CancellationToken.None);
