@@ -454,7 +454,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
 
-            var result =await db.Folders.Where(f => folderIds.Contains(f.Id)).ExecuteUpdateAsync(p => p.SetProperty(x => x.FolderScanDate, x => null));
+            var result =await db.Folders.Where(f => folderIds.Contains(f.Id)).ExecuteUpdateAsync(p => p.SetProperty(x => x.FolderScanDate, x => null).SetProperty(x=>x.ProcessStatus,x=>0));
 
             if (result == 1)
                 _statusService.UpdateStatus("Folder flagged for re-indexing.");
