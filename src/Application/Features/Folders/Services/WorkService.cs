@@ -220,6 +220,12 @@ public class WorkService : IWorkService
         return newJobs > 0;
     }
 
+    public void AddJob(IProcessJob job)
+    {
+        _jobQueue.TryAdd(job);
+        _newJobsFlag = true;
+    }
+
     /// <summary>
     ///     Do the actual work in processing a task in the queue
     /// </summary>

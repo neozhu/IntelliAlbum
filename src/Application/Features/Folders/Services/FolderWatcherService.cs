@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static CleanArchitecture.Blazor.Application.Features.Folders.Services.IndexingService;
 using ILogger = Serilog.ILogger;
 
 namespace CleanArchitecture.Blazor.Application.Features.Folders.Services;
@@ -15,6 +16,7 @@ public class FolderWatcherService
 {
     private static readonly ILogger Logging = Log.ForContext(typeof(FolderWatcherService));
     private static readonly ConcurrentQueue<string> folderQueue = new();
+    private readonly IWorkService _workService;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ImageProcessService _imageProcessService;
     private readonly IStatusService _statusService;
@@ -25,17 +27,19 @@ public class FolderWatcherService
     private bool _fileWatchersDisabled;
     private Task _queueTask;
     public FolderWatcherService(
+        IWorkService workService,
         IServiceScopeFactory scopeFactory,
         ImageProcessService imageService,
         IStatusService statusService,
         ILogger<FolderWatcherService> logger) 
     {
+        _workService = workService;
         _scopeFactory = scopeFactory;
         _imageProcessService = imageService;
         _statusService = statusService;
         _logger = logger;
         // Start a thread which will periodically drain the queue
-        _queueTask = Task.Run(FolderQueueProcessor);
+       _queueTask = Task.Run(FolderQueueProcessor);
     }
     public void LinkIndexingServiceInstance(IndexingService indexingService)
     {
@@ -69,13 +73,24 @@ public class FolderWatcherService
                 var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
                 var uniqueFolders = folders.Distinct(StringComparer.OrdinalIgnoreCase);
                 var pendingFolders = await db.Folders.Where(f => uniqueFolders.Contains(f.Path))
-                    .Select(x => x.Id)
+                    .Select(x => x.Path)
                     .ToListAsync();
 
                 // Call this method synchronously, we don't want to continue otherwise
                 // we'll end up with race conditions as the timer triggers while
                 // the method is completing. 
-                _indexingService.MarkFoldersForScan(pendingFolders).Wait();
+                //await _indexingService.MarkFoldersForScan(pendingFolders);
+                foreach(var folder in pendingFolders)
+                {
+                    _workService.AddJob(new IndexProcess
+                    {
+                        Path = new DirectoryInfo(folder),
+                        Service = _indexingService,
+                        Name = "Indexing"
+                    });
+                }
+                 
+                await Task.Delay(10);
             }
         }
     }
@@ -99,8 +114,10 @@ public class FolderWatcherService
 
                 // Watch for changes in LastAccess and LastWrite
                 // times, and the renaming of files.
-                watcher.NotifyFilter = NotifyFilters.LastWrite;
-                                      
+                watcher.NotifyFilter = NotifyFilters.LastWrite
+                                        | NotifyFilters.FileName
+                                        | NotifyFilters.DirectoryName;
+
 
                 // Add event handlers.
                 watcher.Changed += OnChanged;
@@ -169,8 +186,8 @@ public class FolderWatcherService
         _logger.LogInformation($"FileWatcher: {e.FullPath} {e.ChangeType}");
 
         var file = new FileInfo(e.FullPath);
-
-        EnqueueFolderChangeForRescan(file, e.ChangeType);
+        
+       EnqueueFolderChangeForRescan(file, e.ChangeType);
     }
 
     private void OnRenamed(object source, RenamedEventArgs e)

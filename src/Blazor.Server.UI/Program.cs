@@ -35,9 +35,7 @@ if (app.Environment.IsDevelopment())
         {
             inMemoryNotificationService.Preload();
         }
-        scope.ServiceProvider.GetRequiredService<WorkService>().StartService();
-        scope.ServiceProvider.GetRequiredService<IndexingService>().StartService();
-        var thumbService = scope.ServiceProvider.GetRequiredService<ThumbnailService>();
+      
 
     }
 }
@@ -46,5 +44,12 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+var workservice = app.Services.GetRequiredService<WorkService>();
+workservice.StartService();
+var indexservice = app.Services.GetRequiredService<IndexingService>();
+indexservice.StartService();
+var thumbnailService = app.Services.GetRequiredService<ThumbnailService>();
 
+
+//var thumbService = scope.ServiceProvider.GetRequiredService<ThumbnailService>();
 await app.RunAsync();

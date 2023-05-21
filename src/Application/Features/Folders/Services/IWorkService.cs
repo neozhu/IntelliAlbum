@@ -65,6 +65,7 @@ public class CPULevelSettings
 }
 public interface IWorkService
 {
+    void AddJob(IProcessJob job);
     Task<ServiceStatus> GetWorkStatus();
     Task Pause(bool paused);
     event Action<ServiceStatus> OnStatusChanged;
