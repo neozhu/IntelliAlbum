@@ -17,7 +17,7 @@ namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class IndexingService : IProcessJobFactory, IRescanProvider
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ImageCache _imageCache;
+    //private readonly ImageCache _imageCache;
     private readonly MetaDataService _metaDataService;
     private readonly ServiceSettings _settings;
     private readonly ILogger<IndexingService> _logger;
@@ -29,7 +29,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
     public  string RootFolder { get; set; }
     public  bool EnableIndexing { get; set; } 
     public IndexingService(IServiceScopeFactory scopeFactory,
-        ImageCache imageCache,
+        //ImageCache imageCache,
         MetaDataService metaDataService,
          ServiceSettings settings,
         ILogger<IndexingService> logger,
@@ -40,7 +40,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
     {
 
         _scopeFactory = scopeFactory;
-        _imageCache = imageCache;
+        //_imageCache = imageCache;
         _metaDataService = metaDataService;
         _settings = settings;
         _logger = logger;
@@ -389,7 +389,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                     updatedImages++;
 
                     // Changed, so throw it out of the cache
-                    _imageCache.Evict(image.Id);
+                    //_imageCache.Evict(image.Id);
                 }
             }
             catch (Exception ex)
@@ -411,7 +411,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
 
             // Removing these will remove the associated ImageTag and selection references.
             db.Images.RemoveRange(imagesToDelete);
-            imagesToDelete.ForEach(x => _imageCache.Evict(x.Id));
+            //imagesToDelete.ForEach(x => _imageCache.Evict(x.Id));
             imagesWereAddedOrRemoved = true;
         }
 

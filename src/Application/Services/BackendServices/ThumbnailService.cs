@@ -30,8 +30,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
         new ThumbConfig { width = 800, height = 800, size = ThumbSize.Large, useAsSource = true },
         new ThumbConfig { width = 640, height = 640, size = ThumbSize.Big, batchGenerate = false },
         new ThumbConfig { width = 320, height = 320, size = ThumbSize.Medium },
-        new ThumbConfig
-            { width = 160, height = 120, size = ThumbSize.Preview, cropToRatio = true, batchGenerate = false },
+        new ThumbConfig { width = 160, height = 120, size = ThumbSize.Preview, cropToRatio = true, batchGenerate = false },
         new ThumbConfig { width = 120, height = 120, size = ThumbSize.Small, cropToRatio = true }
     };
 

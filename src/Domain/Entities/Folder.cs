@@ -46,5 +46,8 @@ namespace CleanArchitecture.Blazor.Domain.Entities
             }
         }
         public bool HasSubFolders => Children != null && Children.Any();
+
+
+        public int ProcessStatus { get; set; }
     }
 }
