@@ -1,6 +1,7 @@
 ﻿using CleanArchitecture.Blazor.Application.Common.Configurations;
 using CleanArchitecture.Blazor.Application.Common.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
 using Stopwatch = CleanArchitecture.Blazor.Application.Common.Utils.Stopwatch;
 
@@ -352,12 +353,13 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                 // them based onthe ThumbLastUpdated date.
                 const bool forceRegeneration = false;
 
-                _logger .LogDebug($"Executing CreatThumbs in parallel with {s_maxThreads} threads.");
+                _logger.LogDebug($"Executing CreatThumbs in parallel with {s_maxThreads} threads.");
 
                 try
                 {
                     await imagesToScan.ExecuteInParallel(async img => await CreateThumbs(img, forceRegeneration),
                         s_maxThreads);
+
                 }
                 catch (Exception ex)
                 {
@@ -417,20 +419,11 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
         // Mark the image as done, so that if anything goes wrong it won't go into an infinite loop spiral
         image.ThumbLastUpdated = DateTime.UtcNow;
         var result = await ConvertFile(image, false);
-        if (result!=null &&　result.ThumbsGenerated)
-        {
-            await db.Images.Where(x => x.Id == imageId)
-                            .ExecuteUpdateAsync(x => x.SetProperty(y => y.ThumbImages, y => result.ThumbImages)
-                                                    .SetProperty(y => y.ThumbLastUpdated, y => DateTime.UtcNow)
-                                                    .SetProperty(y => y.ProcessThumbStatus,y => 2));
-        }
-        else
-        {
-            await db.Images.Where(x => x.Id == imageId)
-                            .ExecuteUpdateAsync(x => x.SetProperty(y => y.ThumbLastUpdated, y => DateTime.UtcNow)
-                                                      .SetProperty(y => y.ProcessThumbStatus, y => 3));
-        }
-        
+        await db.Images.Where(x => x.Id == imageId)
+                       .ExecuteUpdateAsync(x => x.SetProperty(y => y.ThumbImages, y => image.ThumbImages)
+                       .SetProperty(y=>y.Hash,y=>image.Hash)
+                       .SetProperty(y => y.ThumbLastUpdated, y => DateTime.UtcNow)
+                       .SetProperty(y => y.ProcessThumbStatus, y => image.ProcessThumbStatus));
         return result;
     }
 
@@ -639,11 +632,13 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                     try
                     {
                         result = await _imageProcessingService.CreateThumbs(imagePath, destFiles);
-                        result.ThumbImages = destFiles.Select(x => new ThumbImage() { Name = x.Key.Name, Url = x.Key.FullName, ThumbSize = x.Value.size.ToString()}).ToList();
+                        image.ProcessThumbStatus = 2;
+                        image.ThumbImages = destFiles.Select(x => new ThumbImage() { Name = x.Key.Name, Url = x.Key.FullName, ThumbSize = x.Value.size.ToString()}).ToList();
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex,"Thumbnail conversion failed for {0}", imagePath);
+                        image.ProcessThumbStatus = 3;
                     }
                     finally
                     {
@@ -657,7 +652,17 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                         // Generate the perceptual hash from the large thumbnail.
                         var largeThumbPath = GetThumbPath(imagePath, ThumbSize.Large);
                         var fileName = (new FileInfo(largeThumbPath)).Name;
-                        result.ThumbImages.Add(new ThumbImage() { Name = fileName, Url = largeThumbPath, ThumbSize = "l", Types = ObjectTypes.Face });
+                        if(image.ThumbImages is not null)
+                        {
+                            image.ThumbImages.Add(new ThumbImage() { Name = fileName, Url = largeThumbPath, ThumbSize = "l", Types = ObjectTypes.Face });
+                        }
+                        else
+                        {
+                            image.ThumbImages = new List<ThumbImage>() {
+                                new ThumbImage() { Name = fileName, Url = largeThumbPath, ThumbSize = "l", Types = ObjectTypes.Face }
+                                };
+                        }
+                        
                         if (File.Exists(largeThumbPath))
                         {
                             result.PerceptualHash = _imageProcessingService.GetPerceptualHash(largeThumbPath);
@@ -665,20 +670,19 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                             // Store the hash with the image.
                             await AddHashToImage(image, result);
                         }
-
-                       
-
                     }
                 }
                 else
                 {
                     _logger.LogDebug("Thumbs already exist in all resolutions. Skipping...");
                     result = new ImageProcessResult { ThumbsGenerated = false };
+                    image.ProcessThumbStatus = 2;
                 }
             }
             else
             {
                 _logger.LogWarning("Skipping thumb generation for missing file...");
+                image.ProcessThumbStatus = 2;
             }
         }
         catch (Exception ex)
