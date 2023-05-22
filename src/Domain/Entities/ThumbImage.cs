@@ -10,7 +10,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities;
     {
         public required string Name { get; set; }
         public ObjectTypes Types { get; set; } = ObjectTypes.Object;
-        public  ThumbSize ThumbSize { get; set; }
+        public string? ThumbSize { get; set; }
        public required string Url { get; set; }
     }
 

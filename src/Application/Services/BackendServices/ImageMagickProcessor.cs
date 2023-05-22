@@ -121,7 +121,7 @@ public class ImageMagickProcessor : IImageProcessor
 
             try
             {
-                Logging.Information("  Executing: {0} {1}", process.StartInfo.FileName, process.StartInfo.Arguments);
+                Logging.Debug("  Executing: {0} {1}", process.StartInfo.FileName, process.StartInfo.Arguments);
 
                 var success = process.Start();
 

@@ -378,7 +378,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                 else
                 {
                     db.Images.Update(image);
-                    //image.MetaData = _metaDataService.ReadImageMetaData(image);
+                    image.MetaData = _metaDataService.ReadImageMetaData(image);
                     updatedImages++;
 
                     // Changed, so throw it out of the cache

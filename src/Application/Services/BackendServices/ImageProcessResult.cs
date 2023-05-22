@@ -10,4 +10,5 @@ public class ImageProcessResult : IImageProcessResult
     public bool ThumbsGenerated { get; set; }
     public string? ImageHash { get; set; }
     public string? PerceptualHash { get; set; }
+    public List<ThumbImage>? ThumbImages { get; set; }
 }

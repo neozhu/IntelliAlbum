@@ -10,6 +10,7 @@ public interface IImageProcessResult
     bool ThumbsGenerated { get; set; }
     string? ImageHash { get; set; }
     string? PerceptualHash { get; set; }
+    List<ThumbImage>? ThumbImages { get; set; }
 }
 public enum ThumbSize
 {
