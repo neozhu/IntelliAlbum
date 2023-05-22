@@ -1,14 +1,6 @@
 ﻿using CleanArchitecture.Blazor.Application.Common.Configurations;
 using CleanArchitecture.Blazor.Application.Common.Utils;
-using CleanArchitecture.Blazor.Application.Services.BackendServices;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
 using Stopwatch = CleanArchitecture.Blazor.Application.Common.Utils.Stopwatch;
 
@@ -16,7 +8,7 @@ namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class ThumbnailService : IProcessJobFactory, IRescanProvider
 {
     private const string _requestRoot = "/images";
-    private static string _thumbnailRootFolder;
+    private string _thumbnailRootFolder;
     private static readonly int s_maxThreads = GetMaxThreads();
 
 
@@ -26,7 +18,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
     private static readonly IThumbConfig[] thumbConfigs =
     {
         new ThumbConfig { width = 2000, height = 2000, size = ThumbSize.ExtraLarge, useAsSource = true, batchGenerate = false },
-        new ThumbConfig { width = 800, height = 800, size = ThumbSize.Large, useAsSource = true },
+        new ThumbConfig { width = 1280, height = 1280, size = ThumbSize.Large, useAsSource = true },
         new ThumbConfig { width = 640, height = 640, size = ThumbSize.Big, batchGenerate = false },
         new ThumbConfig { width = 320, height = 320, size = ThumbSize.Medium },
         new ThumbConfig { width = 160, height = 120, size = ThumbSize.Preview, cropToRatio = true, batchGenerate = false },
@@ -425,7 +417,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
         // Mark the image as done, so that if anything goes wrong it won't go into an infinite loop spiral
         image.ThumbLastUpdated = DateTime.UtcNow;
         var result = await ConvertFile(image, false);
-        if (result.ThumbsGenerated)
+        if (result!=null &&　result.ThumbsGenerated)
         {
             await db.Images.Where(x => x.Id == imageId)
                             .ExecuteUpdateAsync(x => x.SetProperty(y => y.ThumbImages, y => result.ThumbImages)
@@ -512,23 +504,23 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
 
                     if (!Directory.Exists(faceDir))
                     {
-                        _logger.LogInformation($"Created folder for face thumbnails: {faceDir}");
+                        _logger.LogDebug($"Created folder for face thumbnails: {faceDir}");
                         Directory.CreateDirectory(faceDir);
                     }
 
                     if (!destFile.Exists)
                     {
-                        _logger.LogInformation($"Generating face thumb for {image.Id}-{index} from file {thumbPath}...");
+                        _logger.LogDebug($"Generating face thumb for {image.Id}-{index} from file {thumbPath}...");
 
                         MetaDataService.GetImageSize(image.MetaData, out var thumbWidth, out var thumbHeight);
 
-                        _logger.LogTrace($"Loaded {thumbPath.FullName} - {thumbWidth} x {thumbHeight}");
+                        _logger.LogDebug($"Loaded {thumbPath.FullName} - {thumbWidth} x {thumbHeight}");
 
                         var (x, y, width, height) = ScaleDownRect(image.MetaData.Width, image.MetaData.Height,
                             thumbWidth, thumbHeight,
                             faceobject.RectX, faceobject.RectY, faceobject.RectWidth, faceobject.RectHeight);
 
-                        _logger.LogTrace($"Cropping face at {x}, {y}, w:{width}, h:{height}");
+                        _logger.LogDebug($"Cropping face at {x}, {y}, w:{width}, h:{height}");
 
                         // TODO: Update person LastUpdated here?
 
@@ -543,7 +535,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
             }
             else
             {
-                _logger.LogWarning($"Unable to generate face thumb from {thumbPath} - file does not exist.");
+                _logger.LogDebug($"Unable to generate face thumb from {thumbPath} - file does not exist.");
             }
         }
         catch (Exception ex)
