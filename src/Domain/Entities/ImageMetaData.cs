@@ -46,6 +46,8 @@ public class ImageMetaData
     public DateTime? AILastUpdated { get; set; }
     public virtual List<DirectoryBase> EXIFData { get; set; } = new();
 
+    public string? MimeType { get; set; }
+
 }
 
     public class Camera

@@ -418,12 +418,18 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
         var image =await db.Images.Where(x=>x.Id==imageId).Include(x=>x.Folder).FirstAsync();
         // Mark the image as done, so that if anything goes wrong it won't go into an infinite loop spiral
         image.ThumbLastUpdated = DateTime.UtcNow;
+        if(image.MetaData is not null)
+        {
+            image.MetaData.ThumbLastUpdated = image.ThumbLastUpdated;
+        }
         var result = await ConvertFile(image, false);
-        await db.Images.Where(x => x.Id == imageId)
-                       .ExecuteUpdateAsync(x => x.SetProperty(y => y.ThumbImages, y => image.ThumbImages)
-                       .SetProperty(y=>y.Hash,y=>image.Hash)
-                       .SetProperty(y => y.ThumbLastUpdated, y => DateTime.UtcNow)
-                       .SetProperty(y => y.ProcessThumbStatus, y => image.ProcessThumbStatus));
+        //await db.Images.Where(x => x.Id == imageId)
+        //               .ExecuteUpdateAsync(x => x.SetProperty(y => y.ThumbImages, y => image.ThumbImages)
+        //               .SetProperty(y=>y.Hash,y=>image.Hash)
+        //               .SetProperty(y => y.ThumbLastUpdated, y => DateTime.UtcNow)
+        //               .SetProperty(y => y.ProcessThumbStatus, y => image.ProcessThumbStatus));
+        db.Images.Update(image);
+        await db.SaveChangesAsync(CancellationToken.None);
         return result;
     }
 

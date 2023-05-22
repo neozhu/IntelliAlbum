@@ -16,6 +16,8 @@ using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
 using ImageProcessingException = MetadataExtractor.ImageProcessingException;
 using Tag = CleanArchitecture.Blazor.Domain.Entities.Tag;
 using MetadataExtractor.Formats.Mpeg;
+using MetadataExtractor.Formats.FileType;
+using MetadataExtractor.Formats.FileSystem;
 
 namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class MetaDataService
@@ -150,7 +152,7 @@ public class MetaDataService
         var keywords = new string[0];
         List<ImageObject> faceobjects = new List<ImageObject>();
         var imgMetaData = new ImageMetaData();
-        imgMetaData.EXIFData  = new List<DirectoryBase>();
+        imgMetaData.EXIFData = new List<DirectoryBase>();
         try
         {
             var metadata = SafeReadImageMetadata(image.FullPath);
@@ -161,12 +163,22 @@ public class MetaDataService
                 //    foreach (var tag in directory.Tags)
                 //        imgMetaData.EXIFData.Add(new DirectoryBase() { Name = tag.Name, Description = tag.Description });
 
-
+                var filetypeDirectory = metadata.OfType<FileTypeDirectory>().FirstOrDefault();
+                if (filetypeDirectory != null)
+                {
+                    imgMetaData.MimeType = filetypeDirectory.SafeExifGetString(FileTypeDirectory.TagDetectedFileMimeType);
+                }
+                var filemetaDirectory = metadata.OfType<FileMetadataDirectory>().FirstOrDefault();
+                if (filemetaDirectory != null)
+                {
+                    imgMetaData.LastUpdated = filemetaDirectory.SafeGetExifDateTime(FileMetadataDirectory.TagFileModifiedDate);
+                }
                 var subIfdDirectory = metadata.OfType<ExifSubIfdDirectory>().FirstOrDefault();
 
                 if (subIfdDirectory != null)
                 {
                     imgMetaData.DateTaken = subIfdDirectory.SafeGetExifDateTime(ExifDirectoryBase.TagDateTimeDigitized);
+                   
 
                     if (imgMetaData.DateTaken == DateTime.MinValue)
                         imgMetaData.DateTaken =
@@ -239,7 +251,7 @@ public class MetaDataService
                     if (imgMetaData.Height == 0)
                         imgMetaData.Height = bmpDirectory.SafeGetExifInt(BmpHeaderDirectory.TagImageHeight);
                 }
-                
+
                 var gpsDirectory = metadata.OfType<GpsDirectory>().FirstOrDefault();
 
                 if (gpsDirectory != null)
@@ -309,7 +321,8 @@ public class MetaDataService
                     var keywordList = IPTCdir?.GetStringArray(IptcDirectory.TagKeywords);
                     if (keywordList != null)
                         keywords = keywordList;
-                }else if (metadata.OfType<PhotoshopDirectory>().FirstOrDefault() is not null)
+                }
+                else if (metadata.OfType<PhotoshopDirectory>().FirstOrDefault() is not null)
                 {
                     var psDirectory = metadata.OfType<PhotoshopDirectory>().FirstOrDefault();
                     if (psDirectory != null)
@@ -497,8 +510,8 @@ public class MetaDataService
     }
     public static void GetImageSize(ImageMetaData imageMetaData, out int width, out int height)
     {
-       width = imageMetaData.Width;
-       height = imageMetaData.Height;
+        width = imageMetaData.Width;
+        height = imageMetaData.Height;
     }
 
 }
