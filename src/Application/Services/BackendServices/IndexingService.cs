@@ -76,6 +76,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                 Name = "Indexing"
             })
                 .ToArray();
+            //To avoid duplicate execution,modify the ProcessStatus,0=pending,1=processing,2=done,3=error
             await db.Folders.Where(x => folders.Contains(x.Path)).ExecuteUpdateAsync(x => x.SetProperty(y => y.ProcessStatus, v => 1));
             return jobs;
         }
@@ -106,11 +107,10 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
-            var updated = await db.Folders.ExecuteUpdateAsync(p => p.SetProperty(x => x.FolderScanDate, x => null));
-
+            var updated = await db.Folders.Where(x=>x.ParentId==null)
+                                  .ExecuteUpdateAsync(p => p.SetProperty(x => x.FolderScanDate, x => null)
+                                                            .SetProperty(x=>x.ProcessStatus,x=>0));
             _statusService.UpdateStatus($"All {updated} folders flagged for re-indexing.");
-
             _workService.FlagNewJobs(this);
         }
         catch (Exception ex)
@@ -130,11 +130,10 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
-            var folders = await db.Images.Where(x => images.Contains(x.Id))
-            .Select(x => x.Folder.Id)
-            .ToListAsync();
-
+            var folders = await db.Images.Where(x => images.Contains(x.Id)).Select(x => x.Folder.Id).ToListAsync();
+            await db.Folders.Where(x=>folders.Contains(x.Id))
+                            .ExecuteUpdateAsync(p => p.SetProperty(x => x.FolderScanDate, x => null)
+                                                      .SetProperty(x => x.ProcessStatus, x => 0));
             await MarkFoldersForScan(folders);
         }
         catch (Exception ex)
@@ -176,7 +175,6 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
             // Load the existing folder and its images from the DB
             folderToScan = await db.Folders
                 .Where(x => x.Path.Equals(folder.FullName))
@@ -185,26 +183,20 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
 
             if (folderToScan == null)
             {
-                _logger.LogInformation("Scanning new folder: {0}\\{1}", folder.Parent.Name, folder.Name);
-                folderToScan = new Folder { Path = folder.FullName , Name=Path.GetFileName(folder.FullName) };
-            }
-            else
-            {
-                _logger.LogInformation("Scanning existing folder: {0}\\{1} ({2} images in DB)", folder.Parent.Name,
-                folder.Name, folderToScan.Images.Count());
-            }
-
-            if (folderToScan.Id == 0)
-            {
-                _logger.LogInformation($"Adding new folder: {folderToScan.Path}");
-
+                _logger.LogDebug("Scanning new folder: {0}\\{1}", folder.Parent.Name, folder.Name);
+                folderToScan = new Folder { Path = folder.FullName , Name=Path.GetFileName(folder.FullName), ProcessStatus=1 };
                 if (parent != null)
                     folderToScan.ParentId = parent.Id;
 
-                // New folder, add it. 
                 db.Folders.Add(folderToScan);
                 await db.SaveChangesAsync(CancellationToken.None);
                 foldersChanged = true;
+                _logger.LogDebug($"added new folder: {folderToScan.Path}");
+            }
+            else
+            {
+                _logger.LogDebug("Scanning existing folder: {0}\\{1} ({2} images in DB)", folder.Parent.Name,
+                folder.Name, folderToScan.Images.Count());
             }
 
             // Now, check for missing folders, and clean up if appropriate.
@@ -255,13 +247,13 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
             {
                 missingDirs.ForEach(x =>
                 {
-                    _logger.LogInformation("Deleting folder {0}", x.Path);
+                    _logger.LogDebug("Deleting folder {0}", x.Path);
                     _watcherService.RemoveFileWatcher(x.Path);
                 });
 
                 db.Folders.RemoveRange(missingDirs);
 
-                _logger.LogInformation("Removing {0} deleted folders...", missingDirs.Count());
+                _logger.LogDebug("Removing {0} deleted folders...", missingDirs.Count());
                 // Don't use bulk delete; we want EFCore to remove the linked images
                 await db.SaveChangesAsync(CancellationToken.None);
                 foldersChanged = true;
@@ -321,7 +313,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
             // which implies it's been scanned previously, so nothing to do.
             return true;
 
-        _logger.LogInformation($"New or removed images found in folder {dbFolder.Name}.");
+        _logger.LogDebug($"New or removed images found in folder {dbFolder.Name}.");
 
         var watch = new Stopwatch("ScanFolderFiles");
 
@@ -352,14 +344,14 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
 
                     if (!fileChanged)
                     {
-                        _logger.LogTrace($"Indexed image {dbImage.Name} unchanged - skipping.");
+                        _logger.LogDebug($"Indexed image {dbImage.Name} unchanged - skipping.");
                         continue;
                     }
                 }
 
                 var image = dbImage;
 
-                if (image == null) image = new Image { Name = file.Name };
+                if (image == null) image = new Image { Name = file.Name, FolderId=dbFolder.Id };
                 // Store some info about the disk file
                 image.FileSizeBytes = (int)file.Length;
                 image.FileCreationDate = file.CreationTimeUtc;
@@ -374,7 +366,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                     // exists.
                     image.RecentlyViewDatetime = image.FileCreationDate.ToUniversalTime();
 
-                    _logger.LogTrace("Adding new image {0}", image.Name);
+                    _logger.LogDebug("Adding new image {0}", image.Name);
                     if (!dbFolder.Images.Any(x => x.Name.Equals(image.Name, StringComparison.CurrentCultureIgnoreCase)))
                     {
                         dbFolder.Images.Add(image);
@@ -386,7 +378,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                 else
                 {
                     db.Images.Update(image);
-                    image.MetaData = _metaDataService.ReadImageMetaData(image);
+                    //image.MetaData = _metaDataService.ReadImageMetaData(image);
                     updatedImages++;
 
                     // Changed, so throw it out of the cache
@@ -408,7 +400,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
 
         if (imagesToDelete.Any())
         {
-            imagesToDelete.ForEach(x => _logger.LogTrace("Deleting image {0} (ID: {1})", x.Name, x.Id));
+            imagesToDelete.ForEach(x => _logger.LogDebug("Deleting image {0} (ID: {1})", x.Name, x.Id));
 
             // Removing these will remove the associated ImageTag and selection references.
             db.Images.RemoveRange(imagesToDelete);
@@ -420,7 +412,6 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
         dbFolder.FolderScanDate = DateTime.UtcNow;
         dbFolder.ProcessStatus = 2;
         db.Folders.Update(dbFolder);
-
         await db.SaveChangesAsync(CancellationToken.None);
 
         watch.Stop();
@@ -454,7 +445,9 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
 
-            var result =await db.Folders.Where(f => folderIds.Contains(f.Id)).ExecuteUpdateAsync(p => p.SetProperty(x => x.FolderScanDate, x => null).SetProperty(x=>x.ProcessStatus,x=>0));
+            var result =await db.Folders.Where(f => folderIds.Contains(f.Id))
+                                        .ExecuteUpdateAsync(p => p.SetProperty(x => x.FolderScanDate, x => null)
+                                                                  .SetProperty(x=>x.ProcessStatus,x=>0));
 
             if (result == 1)
                 _statusService.UpdateStatus("Folder flagged for re-indexing.");
