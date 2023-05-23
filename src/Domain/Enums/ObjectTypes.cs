@@ -11,7 +11,7 @@ namespace CleanArchitecture.Blazor.Domain
     {
         [Description("Object")]
         Object,
-        [Description("Face")]
-        Face 
+        [Description("Person")]
+        Person
     }
 }

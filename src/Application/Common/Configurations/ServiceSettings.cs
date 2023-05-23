@@ -28,6 +28,11 @@ public class ServiceSettings
     /// Generate Thumbnails
     /// </summary>
     public bool GenerateThumbnails { get; set; }
-  
+    /// <summary>
+    /// Enable object detect
+    /// </summary>
+    public bool EnableObjectDetect { get; set; }
+
+
 }
 

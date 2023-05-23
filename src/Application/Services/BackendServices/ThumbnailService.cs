@@ -18,7 +18,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
     /// </summary>
     private static readonly IThumbConfig[] thumbConfigs =
     {
-        new ThumbConfig { width = 2000, height = 2000, size = ThumbSize.ExtraLarge, useAsSource = true, batchGenerate = false },
+        new ThumbConfig { width = 2560, height = 1440, size = ThumbSize.ExtraLarge, useAsSource = true, batchGenerate = false },
         new ThumbConfig { width = 1280, height = 1280, size = ThumbSize.Large, useAsSource = true },
         new ThumbConfig { width = 640, height = 640, size = ThumbSize.Big, batchGenerate = false },
         new ThumbConfig { width = 320, height = 320, size = ThumbSize.Medium },
@@ -493,10 +493,10 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
             var file = new FileInfo(image.FullPath);
             var thumbPath = new FileInfo(GetThumbPath(file, ThumbSize.Large));
 
-            if (thumbPath.Exists && image.MetaData!=null && image.ImageObjects!=null && image.ImageObjects.Any(x => x.Type == ObjectTypes.Face))
+            if (thumbPath.Exists && image.MetaData!=null && image.ImageObjects!=null && image.ImageObjects.Any(x => x.Type == ObjectTypes.Person))
             {
                 var index = 1;
-                foreach (var faceobject in image.ImageObjects.Where(x => x.Type == ObjectTypes.Face))
+                foreach (var faceobject in image.ImageObjects.Where(x => x.Type == ObjectTypes.Person))
                 {
                     index++;
                     destFile = new FileInfo($"{faceDir}/face_{image.Id}_{index}.jpg");
@@ -639,7 +639,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                     {
                         result = await _imageProcessingService.CreateThumbs(imagePath, destFiles);
                         image.ProcessThumbStatus = 2;
-                        image.ThumbImages = destFiles.Select(x => new ThumbImage() { Name = x.Key.Name, Url = x.Key.FullName, ThumbSize = x.Value.size.ToString()}).ToList();
+                        image.ThumbImages = destFiles.Select(x => new ThumbImage() { Types= ObjectTypes.Object, Name = x.Key.Name, Url = x.Key.FullName, ThumbSize = x.Value.size.ToString()}).ToList();
                     }
                     catch (Exception ex)
                     {
@@ -658,21 +658,9 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                         // Generate the perceptual hash from the large thumbnail.
                         var largeThumbPath = GetThumbPath(imagePath, ThumbSize.Large);
                         var fileName = (new FileInfo(largeThumbPath)).Name;
-                        if(image.ThumbImages is not null)
-                        {
-                            image.ThumbImages.Add(new ThumbImage() { Name = fileName, Url = largeThumbPath, ThumbSize = "l", Types = ObjectTypes.Face });
-                        }
-                        else
-                        {
-                            image.ThumbImages = new List<ThumbImage>() {
-                                new ThumbImage() { Name = fileName, Url = largeThumbPath, ThumbSize = "l", Types = ObjectTypes.Face }
-                                };
-                        }
-                        
                         if (File.Exists(largeThumbPath))
                         {
                             result.PerceptualHash = _imageProcessingService.GetPerceptualHash(largeThumbPath);
-
                             // Store the hash with the image.
                             await AddHashToImage(image, result);
                         }

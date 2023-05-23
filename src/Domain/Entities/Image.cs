@@ -26,6 +26,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public virtual List<Tag>? ImageTags { get; set; }
 
         public virtual List<ImageClassification>? Classification { get; set; }
+        public DateTime? ObjectDetectLastUpdated { get; set; }
         public virtual List<ImageObject>? ImageObjects { get; set; }
 
         public DateTime? ThumbLastUpdated { get; set; }
@@ -48,6 +49,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public int ProcessThumbStatus { get; set; }
         public int DetectObjectStatus { get; set; }
         public int VerifyFaceStatus { get; set; }
+
         
     }
 }

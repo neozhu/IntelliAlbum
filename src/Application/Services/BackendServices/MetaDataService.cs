@@ -1,5 +1,4 @@
 ﻿using CleanArchitecture.Blazor.Application.Common.Utils;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
 using MetadataExtractor.Formats.Iptc;
@@ -8,14 +7,11 @@ using MetadataExtractor.Formats.Png;
 using MetadataExtractor.Formats.Bmp;
 using MetadataExtractor.Formats.Photoshop;
 using MetadataExtractor.Formats.Xmp;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
 
 using Directory = MetadataExtractor.Directory;
 using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
 using ImageProcessingException = MetadataExtractor.ImageProcessingException;
 using Tag = CleanArchitecture.Blazor.Domain.Entities.Tag;
-using MetadataExtractor.Formats.Mpeg;
 using MetadataExtractor.Formats.FileType;
 using MetadataExtractor.Formats.FileSystem;
 
@@ -124,7 +120,7 @@ public class MetaDataService
                     RectY = (int)((y - h / 2) * image.MetaData.Height),
                     RectHeight = (int)(h * image.MetaData.Height),
                     RectWidth = (int)(w * image.MetaData.Width),
-                    Type = ObjectTypes.Face,
+                    Type = ObjectTypes.Person,
                     Score = 100,
                     Name = string.Empty,
 
