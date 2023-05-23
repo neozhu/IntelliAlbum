@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CleanArchitecture.Blazor.Application.Services.BackendServices;
@@ -39,12 +40,12 @@ public class YoloAIService
                 }
                 else
                 {
-                    _logger.LogError("目标检测请求失败" + response.StatusCode);
+                    _logger.LogError($"目标检测请求失败:{image.Name} status:" + response.StatusCode);
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError(e,"目标检测请求失败");
+                _logger.LogError(e,$"目标检测请求失败:{image.Name}");
             }
             return new ObejctDetectResult();
         }
@@ -53,18 +54,22 @@ public class YoloAIService
     {
         var options = new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true // 忽略属性名称的大小写
+            PropertyNameCaseInsensitive = true, // 忽略属性名称的大小写
         };
 
         var detectResult = JsonSerializer.Deserialize<ObejctDetectResult>(responseContent, options);
         return detectResult;
     }
 
+     
+
 }
 
 public class ObejctDetectResult
 {
+    [JsonPropertyName("detect_objects")]
     public List<DetectObject>? DetectObjects { get; set; }
+    [JsonPropertyName("detect_objects_names")]
     public string? DetectObjectsNames { get; set; }
 }
 
@@ -72,7 +77,7 @@ public class DetectObject
 {
     public string Name { get; set; }
     public double Confidence { get; set; }
-    public BoundingBox Bbox { get; set; }
+    public BoundingBox BBox { get; set; }
 }
 
 public class BoundingBox

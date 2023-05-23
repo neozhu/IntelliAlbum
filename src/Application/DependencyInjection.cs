@@ -59,7 +59,8 @@ public static class DependencyInjection
     {
         //services.AddSingleton<StatisticsService>();
         //services.AddSingleton<ConfigService>();
-        //services.AddSingleton<ObjectDetector>();
+        services.AddSingleton<YoloAIService>();
+        services.AddSingleton<ObjectDetectService>();
         services.AddSingleton<FolderWatcherService>();
         services.AddSingleton<IndexingService>();
         services.AddSingleton<MetaDataService>();

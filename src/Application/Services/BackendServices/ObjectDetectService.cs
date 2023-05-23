@@ -1,6 +1,7 @@
 ﻿using CleanArchitecture.Blazor.Application.Common.Configurations;
 using CleanArchitecture.Blazor.Application.Common.Utils;
 using CleanArchitecture.Blazor.Application.Services.BackendServices;
+using FluentEmail.Core;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
@@ -305,10 +306,11 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                     try
                     {
                         var result = await _yoloAIService.DetectObject(imagePath);
-                        image.DetectObjectStatus = 2;
+                        
                         
                         if (result.DetectObjects?.Any() ?? false)
                         {
+                            image.DetectObjectStatus = 2;
                             if (image.ImageTags is null)
                             {
                                 image.ImageTags = new List<Tag>();
@@ -320,8 +322,6 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                             imageObjects = new List<ImageObject>();
                             foreach(var obj in result.DetectObjects)
                             {
-                                image.ImageTags.Add(new Tag() { Keyword = obj.Name });
-                                image.Classification.Add(new ImageClassification() {  Label = obj.Name, Score=obj.Confidence });
                                 if (obj.Name.Equals("person", StringComparison.CurrentCultureIgnoreCase))
                                 {
                                     imageObjects.Add(new ImageObject()
@@ -329,10 +329,10 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                         Type= ObjectTypes.Person,
                                         Tag=new Tag() { Keyword = obj.Name },
                                         Score = obj.Confidence,
-                                        RectX = Convert.ToInt32(obj.Bbox.Xmin),
-                                        RectY = Convert.ToInt32(obj.Bbox.Ymin),
-                                        RectHeight = Convert.ToInt32(obj.Bbox.Ymax),
-                                        RectWidth = Convert.ToInt32(obj.Bbox.Xmax),
+                                        RectX = Convert.ToInt32(obj.BBox.Xmin),
+                                        RectY = Convert.ToInt32(obj.BBox.Ymin),
+                                        RectHeight = Convert.ToInt32(obj.BBox.Ymax),
+                                        RectWidth = Convert.ToInt32(obj.BBox.Xmax),
                                     });
                                 }
                                 else
@@ -342,16 +342,28 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                         Type = ObjectTypes.Object,
                                         Tag = new Tag() { Keyword = obj.Name },
                                         Score = obj.Confidence,
-                                        RectX = Convert.ToInt32(obj.Bbox.Xmin),
-                                        RectY = Convert.ToInt32(obj.Bbox.Ymin),
-                                        RectHeight = Convert.ToInt32(obj.Bbox.Ymax),
-                                        RectWidth = Convert.ToInt32(obj.Bbox.Xmax),
+                                        RectX = Convert.ToInt32(obj.BBox.Xmin),
+                                        RectY = Convert.ToInt32(obj.BBox.Ymin),
+                                        RectHeight = Convert.ToInt32(obj.BBox.Ymax),
+                                        RectWidth = Convert.ToInt32(obj.BBox.Xmax),
                                     });
                                 }
-                                
+                                if(!image.Classification.Any(x=>x.Label.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
+                                {
+                                    image.Classification.Add(new ImageClassification() { Label = obj.Name, Score = obj.Confidence });
+                                }
+                                if(!image.ImageTags.Any(x=>x.Keyword.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
+                                {
+                                    image.ImageTags.Add(new Tag() { Keyword = obj.Name });
+                                }
                             }
+                            
+                            
                         }
-                        
+                        else
+                        {
+                            image.DetectObjectStatus = 3;
+                        }
                         image.ImageObjects = imageObjects;
                     }
                     catch (Exception ex)

@@ -46,13 +46,14 @@ else
     app.UseHsts();
 }
 // Prime the cache
-app.Services.GetRequiredService<ImageCache>().WarmUp().Wait();
+//app.Services.GetRequiredService<ImageCache>().WarmUp().Wait();
 
 var workservice = app.Services.GetRequiredService<WorkService>();
 workservice.StartService();
 var indexservice = app.Services.GetRequiredService<IndexingService>();
 indexservice.StartService();
 var thumbnailService = app.Services.GetRequiredService<ThumbnailService>();
+var objectDetectService = app.Services.GetRequiredService<ObjectDetectService>();
 
 
 //var thumbService = scope.ServiceProvider.GetRequiredService<ThumbnailService>();
