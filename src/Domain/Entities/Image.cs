@@ -31,7 +31,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
 
         public DateTime? ThumbLastUpdated { get; set; }
         public virtual List<ThumbImage>? ThumbImages { get; set; }
-        public DateTime? FaceLandmarksLastUpdated { get; set; }
+        public DateTime? FaceDetectLastUpdated { get; set; }
         public DateTime? FaceVerifyLastUpdated { get; set; }
         public virtual List<FaceDetection>? FaceDetections { get; set; }
 

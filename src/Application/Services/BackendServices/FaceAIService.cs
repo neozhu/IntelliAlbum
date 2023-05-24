@@ -29,8 +29,10 @@ public class FaceAIService
         {
             try
             {
+                var facePlugins = "calculator";
                 var requestContent = new MultipartFormDataContent();
                 var fileContent = new StreamContent(image.OpenRead());
+                requestContent.Add(new StringContent(facePlugins), "face_plugins");
                 requestContent.Add(fileContent, "file", image.Name);
                 var response = await client.PostAsync(FACEDETECTION_REQUEST, requestContent);
                 if (response.IsSuccessStatusCode)
@@ -57,8 +59,10 @@ public class FaceAIService
         {
             try
             {
+                var detect_faces = "true";
                 var requestContent = new MultipartFormDataContent();
                 var fileContent = new StreamContent(image.OpenRead());
+                requestContent.Add(new StringContent(detect_faces), "detect_faces");
                 requestContent.Add(fileContent, "file", image.Name);
                 var response = await client.PostAsync(FACERECOGNITION_REQUEST, requestContent);
                 if (response.IsSuccessStatusCode)
