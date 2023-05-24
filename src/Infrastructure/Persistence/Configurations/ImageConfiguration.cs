@@ -23,7 +23,7 @@ public class ImageConfiguration : IEntityTypeConfiguration<Image>
         builder.OwnsMany(x => x.ImageObjects, b => {
             b.ToJson();
             b.OwnsOne(d => d.Tag);
-            
+            b.OwnsOne(d => d.Avatar);
             });
         builder.OwnsMany(x => x.ImageTags, b => b.ToJson());
         builder.OwnsMany(x => x.ThumbImages, b => b.ToJson());
