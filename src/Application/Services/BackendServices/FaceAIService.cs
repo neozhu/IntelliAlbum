@@ -12,7 +12,8 @@ public class FaceAIService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<YoloAIService> _logger;
-    public const string NAME = "face";
+    public const string DETECTIONNAME = "detection";
+    public const string RECOGNITIONNNAME = "recognition";
     public const string FACEDETECTION_REQUEST = "api/v1/detection/detect";
     public const string FACERECOGNITION_REQUEST = "api/v1/recognition/recognize";
 
@@ -25,14 +26,14 @@ public class FaceAIService
 
     public async Task<FaceDetectObject> DetectFace(FileInfo image)
     {
-        using (var client = _httpClientFactory.CreateClient(NAME))
+        using (var client = _httpClientFactory.CreateClient(DETECTIONNAME))
         {
             try
             {
-                var facePlugins = "calculator";
+                //var facePlugins = "calculator";
                 var requestContent = new MultipartFormDataContent();
                 var fileContent = new StreamContent(image.OpenRead());
-                requestContent.Add(new StringContent(facePlugins), "face_plugins");
+                //requestContent.Add(new StringContent(facePlugins), "face_plugins");
                 requestContent.Add(fileContent, "file", image.Name);
                 var response = await client.PostAsync(FACEDETECTION_REQUEST, requestContent);
                 if (response.IsSuccessStatusCode)
@@ -55,7 +56,7 @@ public class FaceAIService
     }
     public async Task<FaceDetectObject> RecognizeFace(FileInfo image)
     {
-        using (var client = _httpClientFactory.CreateClient(NAME))
+        using (var client = _httpClientFactory.CreateClient(RECOGNITIONNNAME))
         {
             try
             {
@@ -124,6 +125,7 @@ public class Result
     public Box Box { get; set; }
     public List<List<int>> Landmarks { get; set; }
     public double[] Embedding { get; set; }
+    [JsonPropertyName("subjects")]
     public List<Similarity> Similarities { get; set; }
 }
 

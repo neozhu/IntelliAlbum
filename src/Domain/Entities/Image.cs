@@ -34,6 +34,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public DateTime? FaceDetectLastUpdated { get; set; }
         public DateTime? FaceVerifyLastUpdated { get; set; }
         public virtual List<FaceDetection>? FaceDetections { get; set; }
+        public bool HasPerson { get; set; }
 
         [NotMapped]
         public string FullPath => Path.Combine(Folder.Path, Name);

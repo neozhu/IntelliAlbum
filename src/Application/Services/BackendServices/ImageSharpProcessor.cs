@@ -21,6 +21,8 @@ using Serilog;
 using ILogger = Serilog.ILogger;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp.Drawing.Processing;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using System.IO;
 
 namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class ImageSharpProcessor : IImageProcessor, IHashProvider
@@ -143,7 +145,22 @@ public class ImageSharpProcessor : IImageProcessor, IHashProvider
 
         watch.Stop();
     }
+    public async Task GetCropFaceFile(FileInfo source, int xMin, int yMin, int xMax, int yMax, FileInfo destFile)
+    {
+        var watch = new Stopwatch("ImageCropFace");
 
+        // Image.Load(string path) is a shortcut for our default type. 
+        // Other pixel formats use Image.Load<TPixel>(string path))
+        using var image = await Image.LoadAsync<Rgba32>(source.FullName);
+        int width = xMax - xMin;
+        int height = yMax - yMin;
+
+        var rect = new Rectangle(xMin, yMin, width, height);
+        image.Mutate(x => x.Crop(rect));
+        await image.SaveAsync(destFile.FullName);
+
+        watch.Stop();
+    }
     public async Task CropImage(FileInfo source, int x, int y, int width, int height, Stream stream)
     {
         var watch = new Stopwatch("ImageSharpCrop");
@@ -160,7 +177,22 @@ public class ImageSharpProcessor : IImageProcessor, IHashProvider
 
         watch.Stop();
     }
+    public async Task CropFaceImage(FileInfo source, int xMin, int yMin, int xMax, int yMax, Stream stream)
+    {
+        var watch = new Stopwatch("ImageSharpCropFace");
 
+        // Image.Load(string path) is a shortcut for our default type. 
+        // Other pixel formats use Image.Load<TPixel>(string path))
+        using var image = await Image.LoadAsync<Rgba32>(source.FullName);
+
+        int width = xMax - xMin;
+        int height = yMax - yMin;
+
+        var rect = new Rectangle(xMin, yMin, width, height);
+        image.Mutate(x => x.Crop(rect));
+        await image.SaveAsJpegAsync(stream);
+        watch.Stop();
+    }
     /// <summary>
     ///     Transforms an image to add a watermark.
     /// </summary>

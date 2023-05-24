@@ -59,7 +59,10 @@ public static class DependencyInjection
     {
         //services.AddSingleton<StatisticsService>();
         //services.AddSingleton<ConfigService>();
+        services.AddSingleton<ImageSharpProcessor>();
         services.AddSingleton<YoloAIService>();
+        services.AddSingleton<FaceAIService>();
+        services.AddSingleton<FaceDetectService>();
         services.AddSingleton<ObjectDetectService>();
         services.AddSingleton<FolderWatcherService>();
         services.AddSingleton<IndexingService>();

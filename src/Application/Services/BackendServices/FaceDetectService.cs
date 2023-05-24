@@ -16,6 +16,7 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
     private static readonly int s_maxThreads = GetMaxThreads();
     private readonly ThumbSize UseThumbSize = ThumbSize.Big;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ImageSharpProcessor _imageSharpProcessor;
     private readonly ServiceSettings _serviceSettings;
     private readonly FaceAIService _faceAIService;
     private readonly ILogger<ObjectDetectService> _logger;
@@ -23,6 +24,7 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
     private readonly WorkService _workService;
 
     public FaceDetectService(IServiceScopeFactory scopeFactory,
+        ImageSharpProcessor imageSharpProcessor,
         ServiceSettings serviceSettings,
         FaceAIService faceAIService,
         ILogger<ObjectDetectService> logger,
@@ -30,6 +32,7 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
         WorkService workService)
     {
         _scopeFactory = scopeFactory;
+        _imageSharpProcessor = imageSharpProcessor;
         _serviceSettings = serviceSettings;
         _faceAIService = faceAIService;
         _thumbnailRootFolder = _serviceSettings.ThumbPath;
@@ -55,9 +58,8 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
 
-        var images = await db.Images.Where(x => x.FaceDetectLastUpdated == null && x.DetectFaceStatus == 0 &&
-                               x.ThumbLastUpdated != null && x.MetaData != null && x.ImageObjects != null &&
-                               x.ImageObjects.Any(x => x.Type == ObjectTypes.Person))
+        var images = await db.Images.Where(x => x.FaceDetectLastUpdated == null && x.DetectFaceStatus == 0 && x.HasPerson==true &&
+                               x.ThumbLastUpdated != null && x.MetaData != null && x.ImageObjects != null)
             .OrderByDescending(x => x.FileLastModDate)
             .Take(maxJobs)
             .Select(x => x.Id)
@@ -215,7 +217,6 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
                     $"Found {imagesToScan.Count()} images requiring face detect scan. First image is {imagesToScan[0].FullPath}.");
 
                 watch = new Stopwatch("FaceDetectBatch", 100000);
-\\
                 _logger.LogDebug($"Executing face detect scan in parallel with {s_maxThreads} threads.");
 
                 try
@@ -309,17 +310,23 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
                         if (result.Result?.Any() ?? false)
                         {
                             image.DetectFaceStatus = 2;
-
                             imageDetections = new List<FaceDetection>();
+                            var index = 1;
                             foreach (var res in result.Result)
                             {
-                               var destFile = new FileInfo($"{faceDir}/face_{image.Id}_{index}.jpg");
-
+                                index++;
+                                var faceDir = Path.Combine(_thumbnailRootFolder, "_FaceThumbs");
+                                if (!Directory.Exists(faceDir))
+                                {
+                                    Directory.CreateDirectory(faceDir);
+                                }
+                                var destFile = new FileInfo($"{faceDir}/face_{image.Id}_{index}.jpg");
+                                await _imageSharpProcessor.GetCropFaceFile(thumbImagePath, res.Box.XMin, res.Box.YMin, res.Box.XMax, res.Box.YMax, destFile);
                                 imageDetections.Add(new FaceDetection()
                                 {
-                                    Embedding = res.Embedding,
+                                   // Embedding = res.Embedding.Select(x=>Convert.ToSingle(x)).ToArray(),
                                     Probability = res.Box.Probability,
-                                    ThumbUrl = "",
+                                    ThumbUrl = $"{_thumbnailRootFolder}/_FaceThumbs/{destFile.Name}",
                                     RectX = Convert.ToInt32(res.Box.XMin),
                                     RectY = Convert.ToInt32(res.Box.YMin),
                                     RectHeight = Convert.ToInt32(res.Box.YMax),

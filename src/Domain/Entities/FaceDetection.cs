@@ -15,6 +15,6 @@ public class FaceDetection
     public int RectY { get; set; }
     public int RectWidth { get; set; }
     public int RectHeight { get; set; }
-    public double[]? Embedding { get; set; }
+    //public float[]? Embedding { get; set; }
 }
 

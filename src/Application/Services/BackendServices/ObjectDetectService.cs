@@ -324,6 +324,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                             {
                                 if (obj.Name.Equals("person", StringComparison.CurrentCultureIgnoreCase))
                                 {
+                                    image.HasPerson = true;
                                     imageObjects.Add(new ImageObject()
                                     {
                                         Type= ObjectTypes.Person,
