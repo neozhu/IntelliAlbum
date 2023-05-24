@@ -314,7 +314,7 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
                             var index = 1;
                             foreach (var res in result.Result)
                             {
-                                index++;
+                                ++index;
                                 var faceDir = Path.Combine(_thumbnailRootFolder, "_FaceThumbs");
                                 if (!Directory.Exists(faceDir))
                                 {

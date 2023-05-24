@@ -23,6 +23,7 @@ using System.Runtime.InteropServices;
 using SixLabors.ImageSharp.Drawing.Processing;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using System.IO;
+using SkiaSharp;
 
 namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class ImageSharpProcessor : IImageProcessor, IHashProvider
@@ -151,10 +152,23 @@ public class ImageSharpProcessor : IImageProcessor, IHashProvider
 
         // Image.Load(string path) is a shortcut for our default type. 
         // Other pixel formats use Image.Load<TPixel>(string path))
+        // Enlarge by 10 pixels
+        int enlargement = 10;
+        xMin -= enlargement;
+        yMin -= enlargement;
+        xMax += enlargement;
+        yMax += enlargement;
+
         using var image = await Image.LoadAsync<Rgba32>(source.FullName);
+        // Crop rectangle boundary check
+        xMin = Math.Max(xMin, 0);
+        yMin = Math.Max(yMin, 0);
+        xMax = Math.Min(xMax, image.Width);
+        yMax = Math.Min(yMax, image.Height);
+
         int width = xMax - xMin;
         int height = yMax - yMin;
-
+        
         var rect = new Rectangle(xMin, yMin, width, height);
         image.Mutate(x => x.Crop(rect));
         await image.SaveAsync(destFile.FullName);
@@ -180,11 +194,21 @@ public class ImageSharpProcessor : IImageProcessor, IHashProvider
     public async Task CropFaceImage(FileInfo source, int xMin, int yMin, int xMax, int yMax, Stream stream)
     {
         var watch = new Stopwatch("ImageSharpCropFace");
+        // Enlarge by 10 pixels
+        int enlargement = 10;
+        xMin -= enlargement;
+        yMin -= enlargement;
+        xMax += enlargement;
+        yMax += enlargement;
 
         // Image.Load(string path) is a shortcut for our default type. 
         // Other pixel formats use Image.Load<TPixel>(string path))
         using var image = await Image.LoadAsync<Rgba32>(source.FullName);
-
+        // Crop rectangle boundary check
+        xMin = Math.Max(xMin, 0);
+        yMin = Math.Max(yMin, 0);
+        xMax = Math.Min(xMax, image.Width);
+        yMax = Math.Min(yMax, image.Height);
         int width = xMax - xMin;
         int height = yMax - yMin;
 
