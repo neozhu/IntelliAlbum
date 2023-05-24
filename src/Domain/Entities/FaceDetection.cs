@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CleanArchitecture.Blazor.Domain.Entities;
 
-public class FaceLandmark
+public class FaceDetection
 {
     public string? ThumbUrl { get; set; }
     public string? Name { get; set; }

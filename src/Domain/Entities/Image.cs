@@ -33,7 +33,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public virtual List<ThumbImage>? ThumbImages { get; set; }
         public DateTime? FaceLandmarksLastUpdated { get; set; }
         public DateTime? FaceVerifyLastUpdated { get; set; }
-        public virtual List<FaceLandmark>? FaceLandmarks { get; set; }
+        public virtual List<FaceDetection>? FaceDetections { get; set; }
 
         [NotMapped]
         public string FullPath => Path.Combine(Folder.Path, Name);

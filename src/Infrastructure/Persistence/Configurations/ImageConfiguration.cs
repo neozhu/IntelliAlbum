@@ -20,7 +20,7 @@ public class ImageConfiguration : IEntityTypeConfiguration<Image>
             });
         builder.OwnsOne(x => x.Hash, b => b.ToJson());
         builder.OwnsMany(x => x.Classification, b => b.ToJson());
-        builder.OwnsMany(x => x.FaceLandmarks, b => b.ToJson());
+        builder.OwnsMany(x => x.FaceDetections, b => b.ToJson());
         builder.OwnsMany(x => x.ImageObjects, b => {
             b.ToJson();
             b.OwnsOne(d => d.Tag);
