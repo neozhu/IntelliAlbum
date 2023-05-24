@@ -15,5 +15,6 @@ public class FaceLandmark
     public int RectY { get; set; }
     public int RectWidth { get; set; }
     public int RectHeight { get; set; }
+    public double[]? Embedding { get; set; }
 }
 

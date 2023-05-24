@@ -119,6 +119,7 @@ public class Result
 {
     public Box Box { get; set; }
     public List<List<int>> Landmarks { get; set; }
+    public double[] Embedding { get; set; }
     public List<Similarity> Similarities { get; set; }
 }
 
