@@ -31,6 +31,9 @@ namespace CleanArchitecture.Blazor.Domain.Entities
 
         public DateTime? ThumbLastUpdated { get; set; }
         public virtual List<ThumbImage>? ThumbImages { get; set; }
+        public DateTime? FaceLandmarksLastUpdated { get; set; }
+        public DateTime? FaceVerifyLastUpdated { get; set; }
+        public virtual List<FaceLandmark>? FaceLandmarks { get; set; }
 
         [NotMapped]
         public string FullPath => Path.Combine(Folder.Path, Name);
@@ -48,6 +51,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         }
         public int ProcessThumbStatus { get; set; }
         public int DetectObjectStatus { get; set; }
+        public int DetectFaceStatus { get; set; }
         public int VerifyFaceStatus { get; set; }
 
         

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace CleanArchitecture.Blazor.Domain.Entities;
 
-public class ImageAvatar
+public class FaceLandmark
 {
-    public string ThumbUrl { get; set; }
-    public string Name { get; set; }
-    public double Score { get; set; }
+    public string? ThumbUrl { get; set; }
+    public string? Name { get; set; }
+    public double Probability { get; set; }
     public int RectX { get; set; }
     public int RectY { get; set; }
     public int RectWidth { get; set; }
