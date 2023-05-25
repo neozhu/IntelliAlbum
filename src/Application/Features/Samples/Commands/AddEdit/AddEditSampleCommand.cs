@@ -11,6 +11,7 @@ using Exadel.Compreface.Services.RecognitionService;
 using Exadel.Compreface.DTOs.SubjectDTOs.DeleteSubject;
 using Exadel.Compreface.DTOs.SubjectDTOs.AddSubject;
 using Exadel.Compreface.DTOs.FaceCollectionDTOs.AddSubjectExample;
+using Flurl;
 
 namespace CleanArchitecture.Blazor.Application.Features.Samples.Commands.AddEdit;
 
@@ -85,11 +86,17 @@ public class AddEditSampleCommandHandler : IRequestHandler<AddEditSampleCommand,
         {
             var endpoint = _configuration.GetValue<string>("CompareFaceApi:Endpoint");
             var apikey = _configuration.GetValue<string>("CompareFaceApi:RecognitionApiKey");
-            var host = endpoint.Split(':')[0];
-            var port = endpoint.Split(':')[1].Replace("/", "");
+            var uri = new Uri(endpoint);
+            var host = uri.Scheme+"://"+ uri.Host;
+            var port = uri.Port.ToString();
             var client = new CompreFaceClient(domain: host, port: port);
             var faceRecognitionService = client.GetCompreFaceService<RecognitionService>(apikey);
-            var result = await faceRecognitionService.Subject.DeleteAsync(new DeleteSubjectRequest() { ActualSubject = sample.Name });
+            var list = await faceRecognitionService.Subject.ListAsync();
+            if(list.Subjects.Any(x=>x.Equals(sample.Name, StringComparison.CurrentCultureIgnoreCase)))
+            {
+                var result = await faceRecognitionService.Subject.DeleteAsync(new DeleteSubjectRequest() { ActualSubject = sample.Name });
+            }
+            
             var addresult = await faceRecognitionService.Subject.AddAsync(new AddSubjectRequest() { Subject = sample.Name });
             if (addresult.Subject == sample.Name)
             {

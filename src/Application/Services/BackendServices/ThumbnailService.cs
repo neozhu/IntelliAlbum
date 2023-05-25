@@ -33,6 +33,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
     private readonly ILogger<ThumbnailService> _logger;
     private readonly IStatusService _statusService;
     private readonly WorkService _workService;
+    private readonly string _thumbPath;
 
     public ThumbnailService(IServiceScopeFactory scopeFactory,
         ServiceSettings  serviceSettings,
@@ -48,11 +49,11 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
         _statusService = statusService;
         _imageProcessingService = imageService;
         _workService = workService;
-        _thumbnailRootFolder = _serviceSettings.ThumbPath;
+        _thumbPath = _serviceSettings.ThumbPath;
         PicturesRoot = _serviceSettings.SourceDirectory;
         Synology = false;
         EnableThumbnailGeneration = _serviceSettings.GenerateThumbnails;
-        setThumbnailRoot(_thumbnailRootFolder);
+        setThumbnailRoot(_thumbPath);
        _workService.AddJobSource(this);
     }
 
@@ -639,7 +640,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
                     {
                         result = await _imageProcessingService.CreateThumbs(imagePath, destFiles);
                         image.ProcessThumbStatus = 2;
-                        image.ThumbImages = destFiles.Select(x => new ThumbImage() { Types= ObjectTypes.Object, Name = x.Key.Name, Url = x.Key.FullName, ThumbSize = x.Value.size.ToString()}).ToList();
+                        image.ThumbImages = destFiles.Select(x => new ThumbImage() { Types= ObjectTypes.Object, Name = x.Key.Name, Url =$"{_thumbPath}/{x.Key.Name}" , ThumbSize = x.Value.size.ToString()}).ToList();
                     }
                     catch (Exception ex)
                     {
