@@ -56,15 +56,15 @@ else
 //var objectDetectService = app.Services.GetRequiredService<ObjectDetectService>();
 //var faceDetectService = app.Services.GetRequiredService<FaceDetectService>();
 
-var file = new FileInfo("d:\\400.jpg");
-var file2 = new FileInfo("d:\\400_face3.jpg");
-var file3 = new FileInfo("d:\\400_face4.jpg");
-var faceapi = app.Services.GetRequiredService<FaceAIService>();
-var result = await faceapi.DetectFace(file);
-var result2 = await faceapi.RecognizeFace(file);
+//var file = new FileInfo("d:\\400.jpg");
+//var file2 = new FileInfo("d:\\400_face3.jpg");
+//var file3 = new FileInfo("d:\\400_face4.jpg");
+//var faceapi = app.Services.GetRequiredService<FaceAIService>();
+//var result = await faceapi.DetectFace(file);
+//var result2 = await faceapi.RecognizeFace(file);
 
-var imp = app.Services.GetRequiredService<ImageSharpProcessor>();
-await imp.GetCropFaceFile(file, result.Result[0].Box.XMin, result.Result[0].Box.YMin, result.Result[0].Box.XMax, result.Result[0].Box.YMax, file2);
-await imp.GetCropFaceFile(file, result.Result[1].Box.XMin, result.Result[1].Box.YMin, result.Result[1].Box.XMax, result.Result[1].Box.YMax, file3);
+//var imp = app.Services.GetRequiredService<ImageSharpProcessor>();
+//await imp.GetCropFaceFile(file, result.Result[0].Box.XMin, result.Result[0].Box.YMin, result.Result[0].Box.XMax, result.Result[0].Box.YMax, file2);
+//await imp.GetCropFaceFile(file, result.Result[1].Box.XMin, result.Result[1].Box.YMin, result.Result[1].Box.XMax, result.Result[1].Box.YMax, file3);
 ////var thumbService = scope.ServiceProvider.GetRequiredService<ThumbnailService>();
 await app.RunAsync();

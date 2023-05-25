@@ -9,6 +9,8 @@ public enum UploadType : byte
 {
     [Description(@"Products")]
     Product,
+    [Description(@"Samples")]
+    Sample,
     [Description(@"ProfilePictures")]
     ProfilePicture,
     [Description(@"Documents")]

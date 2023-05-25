@@ -6,16 +6,18 @@ using System.Threading.Tasks;
 
 namespace CleanArchitecture.Blazor.Domain.Entities;
 
-public class UserIdentify : BaseAuditableEntity
+public class Sample : BaseAuditableEntity
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public List<ExampleImage>? ExampleImages { get; set; }
-    public float Threshold { get; set; } = 0.7F;
+    public string? Description { get; set; }
+    public List<SampleImage>? SampleImages { get; set; }
+    public float Threshold { get; set; } = 0.8F;
     public string? Result { get; set; }
+
 }
 
-public class ExampleImage
+public class SampleImage
 {
     public required string Name { get; set; }
     public decimal Size { get; set; }

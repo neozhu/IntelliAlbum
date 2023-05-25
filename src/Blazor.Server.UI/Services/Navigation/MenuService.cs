@@ -29,6 +29,12 @@ public class MenuService : IMenuService
                         },
                         new()
                         {
+                            Title = "Samples",
+                            Href = "/pages/Samples",
+                            PageStatus = PageStatus.Completed
+                        },
+                        new()
+                        {
                             Title = "Documents",
                             Href = "/pages/documents",
                             PageStatus = PageStatus.Completed

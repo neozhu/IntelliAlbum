@@ -5,6 +5,18 @@ namespace CleanArchitecture.Blazor.Application.Constants.Permission;
 
 public static class Permissions
 {
+    [DisplayName("Samples")]
+    [Description("Samples Permissions")]
+    public static class Samples
+    {
+        public const string View = "Permissions.Samples.View";
+        public const string Create = "Permissions.Samples.Create";
+        public const string Edit = "Permissions.Samples.Edit";
+        public const string Delete = "Permissions.Samples.Delete";
+        public const string Search = "Permissions.Samples.Search";
+        public const string Export = "Permissions.Samples.Export";
+        public const string Import = "Permissions.Samples.Import";
+    }
     [DisplayName("Folders")]
     [Description("Folders Permissions")]
     public static class Folders
