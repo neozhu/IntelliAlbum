@@ -59,6 +59,7 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
 
         var images = await db.Images.Where(x => x.FaceDetectLastUpdated == null && x.DetectFaceStatus == 0 && x.HasPerson==true &&
+                               x.ObjectDetectLastUpdated!=null && x.DetectObjectStatus==2 &&
                                x.ThumbLastUpdated != null && x.MetaData != null && x.ImageObjects != null)
             .OrderByDescending(x => x.FileLastModDate)
             .Take(maxJobs)

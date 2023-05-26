@@ -83,6 +83,7 @@
                             <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" DisableElevation="true" Size="Size.Small"
                                      Dense="true"
                                      EndIcon="@Icons.Material.Filled.KeyboardArrowDown" IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
+                                <MudMenuItem OnClick="@(()=>OnPreview(context.Item))">@L["Preview"]</MudMenuItem>
                                 @if (_canEdit)
                                 {
                                     <MudMenuItem OnClick="@(()=>OnEdit(context.Item))">@ConstantString.Edit</MudMenuItem>
@@ -132,7 +133,14 @@
                             <MudChip>@context.Item.MetaData.MimeType</MudChip>
                             <MudChip>@context.Item.MetaData.Camera?.Model</MudChip>
                             <MudChip>@context.Item.MetaData.Lens?.Model</MudChip>
-                            <MudChip>@context.Item.MetaData.Caption</MudChip>
+                            @if (!string.IsNullOrEmpty(context.Item.MetaData.Caption))
+                            {
+                                <MudChip>@context.Item.MetaData.Caption</MudChip>
+                            }
+                            @if (!string.IsNullOrEmpty(context.Item.MetaData.Credit))
+                            {
+                                <MudChip>@context.Item.MetaData.Credit</MudChip>
+                            }
                         </div>
                     </CellTemplate>
                 </PropertyColumn>
@@ -158,7 +166,7 @@
                                     @foreach (var face in context.Item.FaceDetections)
                                     {
                                         <MudAvatar>
-                                            <MudImage Src="@face.ThumbUrl"></MudImage>
+                                            <MudImage Src="@($"./thumbs/_FaceThumbs/{face.FileName}")"></MudImage>
                                         </MudAvatar>
                                     }
                                 </MudAvatarGroup>
@@ -168,7 +176,7 @@
                 </PropertyColumn>
                 <PropertyColumn Property="x => x.ProcessThumbStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.ProcessThumbStatus)]">
                     <CellTemplate>
-                        <div class="d-flex flex-row">
+                        <div class="d-flex flex-column">
                             @switch (context.Item.ProcessThumbStatus)
                             {
                                 case 0:
@@ -179,6 +187,7 @@
                                     break;
                                 case 2:
                                     <MudText>Done</MudText>
+                                    <MudText>@context.Item.ThumbLastUpdated?.ToLocalTime()</MudText>
                                     break;
                                 case 3:
                                     <MudText Color="Color.Error">Error</MudText>
@@ -189,7 +198,7 @@
                  </PropertyColumn>
                 <PropertyColumn Property="x => x.DetectObjectStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.DetectObjectStatus)]">
                     <CellTemplate>
-                        <div class="d-flex flex-row">
+                        <div class="d-flex flex-column">
                             @switch (context.Item.DetectObjectStatus)
                             {
                                 case 0:
@@ -200,6 +209,7 @@
                                     break;
                                 case 2:
                                     <MudText>Done</MudText>
+                                    <MudText>@context.Item.FaceDetectLastUpdated?.ToLocalTime()</MudText>
                                     break;
                                 case 3:
                                     <MudText Color="Color.Error">Error</MudText>
@@ -210,7 +220,7 @@
                 </PropertyColumn>
                 <PropertyColumn Property="x => x.DetectFaceStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.DetectFaceStatus)]">
                     <CellTemplate>
-                        <div class="d-flex flex-row">
+                        <div class="d-flex flex-column">
                             @switch (context.Item.DetectFaceStatus)
                             {
                                 case 0:
@@ -221,6 +231,7 @@
                                     break;
                                 case 2:
                                     <MudText>Done</MudText>
+                                    <MudText>@context.Item.FaceDetectLastUpdated?.ToLocalTime()</MudText>
                                     break;
                                 case 3:
                                     <MudText Color="Color.Error">Error</MudText>
@@ -231,7 +242,7 @@
                 </PropertyColumn>
                 <PropertyColumn Property="x => x.RecognizeFaceStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.RecognizeFaceStatus)]">
                     <CellTemplate>
-                        <div class="d-flex flex-row">
+                        <div class="d-flex flex-column">
                             @switch (context.Item.RecognizeFaceStatus)
                             {
                                 case 0:
@@ -242,6 +253,7 @@
                                     break;
                                 case 2:
                                     <MudText>Done</MudText>
+                                    <MudText>@context.Item.FaceRecognizeLastUpdated?.ToLocalTime()</MudText>
                                     break;
                                 case 3:
                                     <MudText Color="Color.Error">Error</MudText>
@@ -261,6 +273,16 @@
                 <MudDataGridPager PageSizeOptions="@(new int[]{10,15,30,50,100,500,1000})" />
             </PagerContent>
         </MudDataGrid>
+        @if (!string.IsNullOrEmpty(_currentDto.Name))
+        {
+            <MudGrid Spacing="2">
+                <MudItem lg="2" md="3" sm="4">
+                <ImageCard Image="@_currentDto" ThumbSize="ThumbSize.Large"></ImageCard>
+                </MudItem>
+            </MudGrid>
+            
+        }
+        
     </ChildContent>
     <ErrorContent>
         <CustomError Exception="context"></CustomError>
@@ -305,6 +327,16 @@
         _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Delete)).Succeeded;
         _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Import)).Succeeded;
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Export)).Succeeded;
+    }
+    private async Task OnPreview(ImageDto dto)
+    {
+        if (dto.ThumbImages?.Any() ?? false)
+        {
+            var url = $"./thumbs/{dto.ThumbImages.First().Name}";
+            var list = dto.ThumbImages.Select(x => $"./thumbs/{x.Name}").ToArray();
+            await JS.InvokeVoidAsync("previewImage", url, list);
+        }
+        
     }
     private async Task<GridData<ImageDto>> ServerReload(GridState<ImageDto> state)
     {

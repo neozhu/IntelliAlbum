@@ -59,6 +59,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
 
         var images = await db.Images.Where(x => x.FaceRecognizeLastUpdated == null && x.RecognizeFaceStatus == 0 && x.HasPerson == true &&
+                               x.FaceDetectLastUpdated!=null && x.DetectFaceStatus==2 &&
                                x.FaceDetections != null)
             .OrderByDescending(x => x.FileLastModDate)
             .Take(maxJobs)
@@ -223,7 +224,6 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
                 {
                     await imagesToScan.ExecuteInParallel(async img => await FaceRecognizeScan(img),
                         s_maxThreads);
-
                 }
                 catch (Exception ex)
                 {
@@ -330,6 +330,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
                         image.ImageTags = new List<Tag>();
                     }
                     image.ImageTags.AddRange(nametag);
+                    image.RecognizeFaceStatus = 2;
                 }
             }
             else

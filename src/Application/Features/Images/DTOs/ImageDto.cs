@@ -31,6 +31,15 @@ public class ImageDto : IMapFrom<Image>
     public DateTime FileLastModDate { get; set; }
     [Description("Recently View Datetime")]
     public DateTime? RecentlyViewDatetime { get; set; }
+    [Description("Thumb Last Updated")]
+    public DateTime? ThumbLastUpdated { get; set; }
+    [Description("Object Detect Last Updated")]
+    public DateTime? ObjectDetectLastUpdated { get; set; }
+    [Description("Face Detect Last Updated")]
+    public DateTime? FaceDetectLastUpdated { get; set; }
+    [Description("Face Recognize Last Updated")]
+    public DateTime? FaceRecognizeLastUpdated { get; set; }
+
     [Description("Metadata")]
     public virtual ImageMetaData MetaData { get; set; } = new();
     [Description("Hash")]
@@ -42,6 +51,8 @@ public class ImageDto : IMapFrom<Image>
     public virtual List<ImageClassification> Classification { get; init; } = new();
     [Description("Recognized Objects")]
     public virtual List<ImageObject> ImageObjects { get; init; } = new();
+    [Description("Thumb Images")]
+    public virtual List<ThumbImage>? ThumbImages { get; set; }
     public FolderDto Folder { get; set; } = null!;
     public override string ToString()
     {

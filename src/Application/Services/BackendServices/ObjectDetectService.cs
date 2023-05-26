@@ -56,7 +56,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
 
         var images = await db.Images.Where(x =>x.ObjectDetectLastUpdated ==null && x.DetectObjectStatus == 0 &&
-                               x.ThumbLastUpdated != null && x.MetaData!=null )
+                               x.ThumbLastUpdated != null && x.ProcessThumbStatus==2 && x.MetaData!=null )
             .OrderByDescending(x => x.FileLastModDate)
             .Take(maxJobs)
             .Select(x => x.Id)

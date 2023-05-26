@@ -48,17 +48,17 @@ else
 // Prime the cache
 //app.Services.GetRequiredService<ImageCache>().WarmUp().Wait();
 
-//var workservice = app.Services.GetRequiredService<WorkService>();
-//workservice.StartService();
-//var indexservice = app.Services.GetRequiredService<IndexingService>();
-//indexservice.StartService();
-//var thumbnailService = app.Services.GetRequiredService<ThumbnailService>();
-//var objectDetectService = app.Services.GetRequiredService<ObjectDetectService>();
-//var faceDetectService = app.Services.GetRequiredService<FaceDetectService>();
-//var faceRecognizeService = app.Services.GetRequiredService<FaceRecognizeService>();
+var workservice = app.Services.GetRequiredService<WorkService>();
+workservice.StartService();
+var indexservice = app.Services.GetRequiredService<IndexingService>();
+indexservice.StartService();
+var thumbnailService = app.Services.GetRequiredService<ThumbnailService>();
+var objectDetectService = app.Services.GetRequiredService<ObjectDetectService>();
+var faceDetectService = app.Services.GetRequiredService<FaceDetectService>();
+var faceRecognizeService = app.Services.GetRequiredService<FaceRecognizeService>();
 
-var rescanService = app.Services.GetRequiredService<RescanService>();
-await rescanService.MarkAllForRescan( RescanTypes.Thumbnails);
+//var rescanService = app.Services.GetRequiredService<RescanService>();
+//await rescanService.MarkAllForRescan( RescanTypes.Thumbnails);
 //var file = new FileInfo("d:\\400.jpg");
 //var file2 = new FileInfo("d:\\400_face3.jpg");
 //var file3 = new FileInfo("d:\\400_face4.jpg");

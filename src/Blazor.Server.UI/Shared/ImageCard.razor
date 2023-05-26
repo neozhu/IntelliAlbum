@@ -1,0 +1,80 @@
+﻿@using CleanArchitecture.Blazor.Application.Features.Images.DTOs;
+@inject IStringLocalizer<SharedResource> L
+<MudCard Class="@className" Elevation="3">
+  @*  <div class="d-flex justify-center pa-0 ma-0">
+        <MudImage ObjectFit="ObjectFit.Cover"  Src="@(ImageUrl())" />
+    </div>*@
+
+
+    <MudCardMedia Image="@(ImageUrl())" Height="200" />
+    <MudCardContent>
+        <MudStack Row="true"  AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
+            <div class="mud-link-disabled" style="color:#00000089">@Image.MetaData.DateTaken</div>
+        </MudStack>
+        <MudStack Row="true" Class="flex-wrap" Spacing="1">
+        @foreach(var tag in Image.ImageTags.Where(x=>!string.IsNullOrEmpty(x.Keyword)))
+        {
+            <MudChip Class="ma-0" Size="Size.Small">@tag.Keyword</MudChip>
+            }
+        </MudStack>
+        @if (_showMore)
+        {
+            <MudText Typo="Typo.body2">@L["Image Metadata"]</MudText>
+            @if (Image.MetaData.Camera is not null)
+            {
+                <MudText Typo="Typo.body2">@Image.MetaData.Camera.Model</MudText>
+            }
+            @if (Image.MetaData.Lens is not null)
+            {
+                <MudText Typo="Typo.body2">@Image.MetaData.Lens.Model</MudText>
+            }
+            @if (Image.MetaData.Caption is not null)
+            {
+                <MudText Typo="Typo.body2">@Image.MetaData.Caption</MudText>
+            }
+            @if (Image.MetaData.MimeType is not null)
+            {
+                <MudText Typo="Typo.body2">Mime Type: @Image.MetaData.MimeType</MudText>
+            }
+            @if (Image.MetaData.ISO is not null)
+            {
+                <MudText Typo="Typo.body2">ISO: @Image.MetaData.ISO</MudText>
+            }
+
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton StartIcon="@Icons.Material.Filled.ShoppingCartCheckout" Variant="Variant.Text" Color="Color.Primary">@L["Select"]</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="@(()=>_showMore=!_showMore)" Color="Color.Primary">@L["More"]</MudButton>
+    </MudCardActions>
+</MudCard>
+@code {
+    private string className => "image-card";
+    [Parameter]
+    public ImageDto Image { get; set; }
+    [Parameter]
+    public ThumbSize ThumbSize { get; set; }
+    private bool _showMore = false;
+
+    public string ImageUrl()
+    {
+        var extension =new FileInfo(Image.Name).Extension;
+        var baseName = Path.GetFileNameWithoutExtension(Image.Name);
+        var thumbFileName = $"{baseName}_{GetSizePostFix(ThumbSize)}{extension}";
+        return $"./thumbs/{thumbFileName}";
+    }
+    private string GetSizePostFix(ThumbSize size)
+    {
+        return size switch
+        {
+            ThumbSize.ExtraLarge => "xl",
+            ThumbSize.Large => "l",
+            ThumbSize.Big => "b",
+            ThumbSize.Medium => "m",
+            ThumbSize.Small => "s",
+            _ => "PREVIEW"
+        };
+    }
+
+
+}
