@@ -12,6 +12,7 @@ using Exadel.Compreface.DTOs.SubjectDTOs.DeleteSubject;
 using Exadel.Compreface.DTOs.SubjectDTOs.AddSubject;
 using Exadel.Compreface.DTOs.FaceCollectionDTOs.AddSubjectExample;
 using Flurl;
+using Exadel.Compreface.DTOs.FaceCollectionDTOs.ListAllExampleSubject;
 
 namespace CleanArchitecture.Blazor.Application.Features.Samples.Commands.AddEdit;
 
@@ -61,7 +62,7 @@ public class AddEditSampleCommandHandler : IRequestHandler<AddEditSampleCommand,
         {
             var item = await _context.Samples.FindAsync(new object[] { request.Id }, cancellationToken) ?? throw new NotFoundException($"Sample with id: [{request.Id}] not found.");
             item = _mapper.Map(dto, item);
-            item.Result =await SyncToCompareFace(item);
+            item.Result = await SyncToCompareFace(item);
             // raise a update domain event
             item.AddDomainEvent(new SampleUpdatedEvent(item));
             await _context.SaveChangesAsync(cancellationToken);
@@ -87,19 +88,14 @@ public class AddEditSampleCommandHandler : IRequestHandler<AddEditSampleCommand,
             var endpoint = _configuration.GetValue<string>("CompareFaceApi:Endpoint");
             var apikey = _configuration.GetValue<string>("CompareFaceApi:RecognitionApiKey");
             var uri = new Uri(endpoint);
-            var host = uri.Scheme+"://"+ uri.Host;
+            var host = uri.Scheme + "://" + uri.Host;
             var port = uri.Port.ToString();
             var client = new CompreFaceClient(domain: host, port: port);
             var faceRecognitionService = client.GetCompreFaceService<RecognitionService>(apikey);
             var list = await faceRecognitionService.Subject.ListAsync();
-            if(list.Subjects.Any(x=>x.Equals(sample.Name, StringComparison.CurrentCultureIgnoreCase)))
+            if (list.Subjects.Any(x => x.Equals(sample.Name, StringComparison.CurrentCultureIgnoreCase)))
             {
-                var result = await faceRecognitionService.Subject.DeleteAsync(new DeleteSubjectRequest() { ActualSubject = sample.Name });
-            }
-            
-            var addresult = await faceRecognitionService.Subject.AddAsync(new AddSubjectRequest() { Subject = sample.Name });
-            if (addresult.Subject == sample.Name)
-            {
+                var deleteAllExamples = await faceRecognitionService.FaceCollection.DeleteAllAsync(new Exadel.Compreface.DTOs.FaceCollectionDTOs.DeleteAllSubjectExamples.DeleteAllExamplesRequest() { Subject = sample.Name });
                 foreach (var img in sample.SampleImages)
                 {
                     var file = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), img.Url));
@@ -108,17 +104,39 @@ public class AddEditSampleCommandHandler : IRequestHandler<AddEditSampleCommand,
                         var addimage = await faceRecognitionService.FaceCollection.AddAsync(
                                 new AddSubjectExampleRequestByFilePath()
                                 {
-                                    Subject = addresult.Subject,
+                                    Subject = sample.Name,
                                     DetProbThreShold = Convert.ToDecimal(sample.Threshold),
                                     FilePath = file.FullName
                                 });
                     }
+                }
+            }
+            else
+            {
+                var addresult = await faceRecognitionService.Subject.AddAsync(new AddSubjectRequest() { Subject = sample.Name });
+                if (addresult.Subject == sample.Name)
+                {
+                    foreach (var img in sample.SampleImages)
+                    {
+                        var file = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), img.Url));
+                        if (file.Exists)
+                        {
+                            var addimage = await faceRecognitionService.FaceCollection.AddAsync(
+                                    new AddSubjectExampleRequestByFilePath()
+                                    {
+                                        Subject = addresult.Subject,
+                                        DetProbThreShold = Convert.ToDecimal(sample.Threshold),
+                                        FilePath = file.FullName
+                                    });
+                        }
+
+                    }
 
                 }
-
             }
-            return "Sync to Docker";
-        }catch(Exception e)
+            return "Sync success.";
+        }
+        catch (Exception e)
         {
             return e.Message;
         }

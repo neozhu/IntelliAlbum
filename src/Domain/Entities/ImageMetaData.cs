@@ -46,6 +46,7 @@ public class ImageMetaData
     public DateTime? ObjectDetectLastUpdated { get; set; }
 
     public DateTime? FaceDetectLastUpdated { get; set; }
+    public DateTime? FaceRecognizeLastUpdated { get; set; }
 
     public virtual List<DirectoryBase>? EXIFData { get; set; }
 

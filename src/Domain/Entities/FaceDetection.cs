@@ -10,11 +10,13 @@ public class FaceDetection
 {
     public string? ThumbUrl { get; set; }
     public string? Name { get; set; }
-    public double Probability { get; set; }
+    public float Probability { get; set; }
+    public float Similarity { get; set; }
     public int RectX { get; set; }
     public int RectY { get; set; }
     public int RectWidth { get; set; }
     public int RectHeight { get; set; }
+    public string? FileName { get; set; }
     //public float[]? Embedding { get; set; }
 }
 

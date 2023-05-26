@@ -47,6 +47,15 @@ public class ImageDto : IMapFrom<Image>
     {
         return $"{Name} [{Id}]";
     }
-
+    [Description("Face Detections")]
+    public virtual List<FaceDetection>? FaceDetections { get; set; }
+    [Description("Process Thumb Status")]
+    public int ProcessThumbStatus { get; set; }
+    [Description("Detect Object Status")]
+    public int DetectObjectStatus { get; set; }
+    [Description("Detect Face Status")]
+    public int DetectFaceStatus { get; set; }
+    [Description("Recognize Face Status")]
+    public int RecognizeFaceStatus { get; set; }
 }
 

@@ -13,7 +13,8 @@ public enum RescanTypes
     Indexing = 1,
     Metadata = 2,
     Thumbnails = 4,
-    AI = 8
+    FaceDetection = 5,
+    FaceRecognition=6
 }
 public interface IRescanService
 {

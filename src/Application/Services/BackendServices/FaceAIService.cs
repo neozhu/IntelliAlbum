@@ -102,7 +102,7 @@ public class FaceAIService
 public class Box
 {
     [JsonPropertyName("probability")]
-    public double Probability { get; set; }
+    public float Probability { get; set; }
     [JsonPropertyName("x_max")]
     public int XMax { get; set; }
     [JsonPropertyName("y_max")]
@@ -117,7 +117,7 @@ public class Similarity
 {
     public string Subject { get; set; }
     [JsonPropertyName("similarity")]
-    public double SimilarityScore { get; set; }
+    public float SimilarityScore { get; set; }
 }
 
 public class Result
@@ -131,6 +131,6 @@ public class Result
 
 public class FaceDetectObject
 {
-    public List<Result> Result { get; set; }
+    public List<Result> Result { get; set; } = new();
 }
 

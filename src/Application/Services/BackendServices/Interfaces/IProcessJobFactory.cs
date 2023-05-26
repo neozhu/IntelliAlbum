@@ -15,7 +15,8 @@ public enum JobPriorities
     Metadata = 3,
     Thumbnails = 4,
     ObjectDetection=5,
-    ImageRecognition = 6
+    FaceDetection = 6,
+    FaceRecognition = 7
 }
 public interface IProcessJob
 {

@@ -68,6 +68,7 @@ public static class DependencyInjection
         services.AddSingleton<IndexingService>();
         services.AddSingleton<MetaDataService>();
         services.AddSingleton<ThumbnailService>();
+        services.AddSingleton<FaceRecognizeService>();
         //services.AddSingleton<ExifService>();
         services.AddSingleton<FolderService>();
         //services.AddSingleton<ThemeService>();
@@ -76,7 +77,7 @@ public static class DependencyInjection
         services.AddSingleton<WorkService>();
         //services.AddSingleton<CachedDataService>();
         //services.AddSingleton<TaskService>();
-        //services.AddSingleton<RescanService>();
+        services.AddSingleton<RescanService>();
         services.AddSingleton<ServerNotifierService>();
         services.AddSingleton<ServerStatusService>();
         //services.AddSingleton<DownloadService>();

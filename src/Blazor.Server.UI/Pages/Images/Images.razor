@@ -21,58 +21,58 @@
 
 <ErrorBoundary>
     <ChildContent>
-       <MudDataGrid ServerData="@(ServerReload)"
-                  FixedHeader="true"
-                  FixedFooter="true"
-                  Virtualize="true"
-                  @bind-RowsPerPage="_defaultPageSize"
-                  Height="calc(100vh - 330px)"
-                  Loading="@_loading"
-                  MultiSelection="true"
-                  @bind-SelectedItems="_selectedItems"
-                  @bind-SelectedItem="_currentDto"
-                  Hover="true" @ref="_table">
+        <MudDataGrid ServerData="@(ServerReload)"
+                     FixedHeader="true"
+                     FixedFooter="true"
+                     Virtualize="true"
+                     @bind-RowsPerPage="_defaultPageSize"
+                     Height="calc(100vh - 330px)"
+                     Loading="@_loading"
+                     MultiSelection="true"
+                     @bind-SelectedItems="_selectedItems"
+                     @bind-SelectedItem="_currentDto"
+                     Hover="true" @ref="_table">
             <ToolBarContent>
-                 <div class="d-flex align-start flex-grow-1">
-                        <div class="d-flex gap-4">
-                            <MudIcon Icon="@Icons.Material.Filled.Window" Size="Size.Large" />
-                            <div class="d-flex flex-column">
-                                <MudText Typo="Typo.caption">@Title</MudText>
+                <div class="d-flex align-start flex-grow-1">
+                    <div class="d-flex gap-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Window" Size="Size.Large" />
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.caption">@Title</MudText>
                             <MudEnumSelect Style="min-width:120px" TEnum="ImageListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
-                                </MudEnumSelect>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1" />
-
-                        <div class="d-flex flex-column justify-end">
-                            <div class="d-flex">
-                                 <MudButton DisableElevation Variant="Variant.Outlined"
-                                           Size="Size.Small"
-                                           Disabled="@_loading"
-                                           OnClick="@(()=>OnRefresh())"
-                                           StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Primary"
-                                           Style="margin-right: 4px; margin-bottom:4px">@ConstantString.Refresh</MudButton>
-                               
-                                @if (_canDelete)
-                                {
-                                    <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Error"
-                                           StartIcon="@Icons.Material.Filled.Delete"
-                                           Disabled="@(!(_selectedItems.Count>0))"
-                                           Size="Size.Small"
-                                           Style="margin-right: 4px; margin-bottom:4px"
-                                           OnClick="OnDeleteChecked"
-                                           IconColor="Color.Surface">@ConstantString.Delete</MudButton>
-                                }
-                                
-                            </div>
-                            @if (_canSearch)
-                            {
-                            <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Value="@Query.Keyword" Placeholder="@ConstantString.Search" Adornment="Adornment.End"
-                                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"></MudTextField>
-                            }
-                    
+                            </MudEnumSelect>
                         </div>
                     </div>
+                    <div class="flex-grow-1" />
+
+                    <div class="d-flex flex-column justify-end">
+                        <div class="d-flex">
+                            <MudButton DisableElevation Variant="Variant.Outlined"
+                                        Size="Size.Small"
+                                        Disabled="@_loading"
+                                        OnClick="@(()=>OnRefresh())"
+                                        StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Primary"
+                                        Style="margin-right: 4px; margin-bottom:4px">@ConstantString.Refresh</MudButton>
+
+                             @if (_canDelete)
+                            {
+                                <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Error"
+                                            StartIcon="@Icons.Material.Filled.Delete"
+                                            Disabled="@(!(_selectedItems.Count>0))"
+                                            Size="Size.Small"
+                                            Style="margin-right: 4px; margin-bottom:4px"
+                                            OnClick="OnDeleteChecked"
+                                            IconColor="Color.Surface">@ConstantString.Delete</MudButton>
+                            }
+
+                        </div>
+                        @if (_canSearch)
+                        {
+                            <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Value="@Query.Keyword" Placeholder="@ConstantString.Search" Adornment="Adornment.End"
+                                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"></MudTextField>
+                        }
+
+                    </div>
+                </div>
             </ToolBarContent>
             <Columns>
                 <SelectColumn ShowInFooter="false"></SelectColumn>
@@ -95,37 +95,161 @@
                         }
                         else
                         {
-                            <MudIconButton Variant="Variant.Filled" DisableElevation="true" 
-                                       Disabled="true"
-                                       Icon="@Icons.Material.Filled.DoNotTouch"
-                                       Size="Size.Small"
-                                       Color="Color.Surface">
+                            <MudIconButton Variant="Variant.Filled" DisableElevation="true"
+                                           Disabled="true"
+                                           Icon="@Icons.Material.Filled.DoNotTouch"
+                                           Size="Size.Small"
+                                           Color="Color.Surface">
                                 @ConstantString.NoAllowed
                             </MudIconButton>
                         }
                     </CellTemplate>
                 </TemplateColumn>
-                @*TODO: Define the fields that should be displayed in data table*@
-                <PropertyColumn Property="x => x.Name" Title="@L[_currentDto.GetMemberDescription(x=>x.Name)]"> 
-   <CellTemplate>
-      <div class="d-flex flex-column">
-        <MudText Typo="Typo.body2">@context.Item.Name</MudText>
-     </div>
-    </CellTemplate>
-</PropertyColumn>
-                <PropertyColumn Property="x => x.FolderId" Title="@L[_currentDto.GetMemberDescription(x=>x.FolderId)]" />
-                <PropertyColumn Property="x => x.Folder" Title="@L[_currentDto.GetMemberDescription(x=>x.Folder)]" />
-                <PropertyColumn Property="x => x.Comments" Title="@L[_currentDto.GetMemberDescription(x=>x.Comments)]" />
+                <PropertyColumn Property="x => x.Name" Title="@L[_currentDto.GetMemberDescription(x=>x.Name)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.body2">@context.Item.Name</MudText>
+                            <MudText Typo="Typo.body2">@context.Item.Comments</MudText>
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.FolderId" Title="@L[_currentDto.GetMemberDescription(x=>x.FolderId)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.body2">@context.Item.Folder.Name</MudText>
+                            <MudText Typo="Typo.body2">@context.Item.Folder.FolderScanDate</MudText>
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
+
                 <PropertyColumn Property="x => x.FileSizeBytes" Title="@L[_currentDto.GetMemberDescription(x=>x.FileSizeBytes)]" />
                 <PropertyColumn Property="x => x.FileCreationDate" Title="@L[_currentDto.GetMemberDescription(x=>x.FileCreationDate)]" />
                 <PropertyColumn Property="x => x.FileLastModDate" Title="@L[_currentDto.GetMemberDescription(x=>x.FileLastModDate)]" />
                 <PropertyColumn Property="x => x.RecentlyViewDatetime" Title="@L[_currentDto.GetMemberDescription(x=>x.RecentlyViewDatetime)]" />
-                <PropertyColumn Property="x => x.MetaData" Title="@L[_currentDto.GetMemberDescription(x=>x.MetaData)]" />
-                <PropertyColumn Property="x => x.Hash" Title="@L[_currentDto.GetMemberDescription(x=>x.Hash)]" />
-                <PropertyColumn Property="x => x.ImageTags" Title="@L[_currentDto.GetMemberDescription(x=>x.ImageTags)]" />
-                <PropertyColumn Property="x => x.Classification" Title="@L[_currentDto.GetMemberDescription(x=>x.Classification)]" />
-                <PropertyColumn Property="x => x.ImageObjects" Title="@L[_currentDto.GetMemberDescription(x=>x.ImageObjects)]" />
-
+                <PropertyColumn Property="x => x.MetaData" Title="@L[_currentDto.GetMemberDescription(x=>x.MetaData)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-row">
+                            <MudChip>@context.Item.MetaData.MimeType</MudChip>
+                            <MudChip>@context.Item.MetaData.Camera?.Model</MudChip>
+                            <MudChip>@context.Item.MetaData.Lens?.Model</MudChip>
+                            <MudChip>@context.Item.MetaData.Caption</MudChip>
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.ImageTags" Title="@L[_currentDto.GetMemberDescription(x=>x.ImageTags)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-row">
+                            @if (context.Item.ImageTags?.Any() ?? false)
+                            {
+                                @foreach (var tag in context.Item.ImageTags)
+                                {
+                                    <MudChip>@tag.Keyword</MudChip>
+                                }
+                            }
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.FaceDetections" Title="@L[_currentDto.GetMemberDescription(x=>x.FaceDetections)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-row">
+                            @if (context.Item.FaceDetections?.Any() ?? false)
+                            {
+                                <MudAvatarGroup>
+                                    @foreach (var face in context.Item.FaceDetections)
+                                    {
+                                        <MudAvatar>
+                                            <MudImage Src="@face.ThumbUrl"></MudImage>
+                                        </MudAvatar>
+                                    }
+                                </MudAvatarGroup>
+                            }
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.ProcessThumbStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.ProcessThumbStatus)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-row">
+                            @switch (context.Item.ProcessThumbStatus)
+                            {
+                                case 0:
+                                    <MudText>Not Start</MudText>
+                                    break;
+                                case 1:
+                                    <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                    break;
+                                case 2:
+                                    <MudText>Done</MudText>
+                                    break;
+                                case 3:
+                                    <MudText Color="Color.Error">Error</MudText>
+                                    break;
+                            }
+                        </div>
+                    </CellTemplate>
+                 </PropertyColumn>
+                <PropertyColumn Property="x => x.DetectObjectStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.DetectObjectStatus)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-row">
+                            @switch (context.Item.DetectObjectStatus)
+                            {
+                                case 0:
+                                    <MudText>Not Start</MudText>
+                                    break;
+                                case 1:
+                                    <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                    break;
+                                case 2:
+                                    <MudText>Done</MudText>
+                                    break;
+                                case 3:
+                                    <MudText Color="Color.Error">Error</MudText>
+                                    break;
+                            }
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.DetectFaceStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.DetectFaceStatus)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-row">
+                            @switch (context.Item.DetectFaceStatus)
+                            {
+                                case 0:
+                                    <MudText>Not Start</MudText>
+                                    break;
+                                case 1:
+                                    <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                    break;
+                                case 2:
+                                    <MudText>Done</MudText>
+                                    break;
+                                case 3:
+                                    <MudText Color="Color.Error">Error</MudText>
+                                    break;
+                            }
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.RecognizeFaceStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.RecognizeFaceStatus)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-row">
+                            @switch (context.Item.RecognizeFaceStatus)
+                            {
+                                case 0:
+                                    <MudText>Not Start</MudText>
+                                    break;
+                                case 1:
+                                    <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                    break;
+                                case 2:
+                                    <MudText>Done</MudText>
+                                    break;
+                                case 3:
+                                    <MudText Color="Color.Error">Error</MudText>
+                                    break;
+                            }
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
             </Columns>
             <NoRecordsContent>
                 <MudText>@ConstantString.NoRecords</MudText>
@@ -177,7 +301,7 @@
         var state = await AuthState;
         _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Create)).Succeeded;
         _canSearch = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Search)).Succeeded;
-        _canEdit   = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Edit)).Succeeded;
+        _canEdit = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Edit)).Succeeded;
         _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Delete)).Succeeded;
         _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Import)).Succeeded;
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Export)).Succeeded;
@@ -215,12 +339,12 @@
     {
         ImageCacheKey.Refresh();
         _selectedItems = new();
-        Query.Keyword  = string.Empty;
+        Query.Keyword = string.Empty;
         await _table.ReloadServerData();
     }
 
-    
-    
+
+
     private async Task OnEdit(ImageDto dto)
     {
         var command = Mapper.Map<UpdateImageCommand>(dto);
@@ -241,7 +365,7 @@
     private async Task OnDelete(ImageDto dto)
     {
         var command = new DeleteImageCommand(new int[] { dto.Id });
-        var parameters = new DialogParameters 
+        var parameters = new DialogParameters
            {
              { nameof(DeleteConfirmation.Command),  command },
              { nameof(DeleteConfirmation.ContentText), string.Format(ConstantString.DeleteConfirmation, dto.Name) }
@@ -251,7 +375,7 @@
         var state = await dialog.Result;
         if (!state.Canceled)
         {
-             await _table.ReloadServerData();
+            await _table.ReloadServerData();
         }
     }
 
@@ -272,6 +396,6 @@
         }
     }
 
-    
+
 
 }

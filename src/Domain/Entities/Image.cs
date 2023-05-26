@@ -32,7 +32,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public DateTime? ThumbLastUpdated { get; set; }
         public virtual List<ThumbImage>? ThumbImages { get; set; }
         public DateTime? FaceDetectLastUpdated { get; set; }
-        public DateTime? FaceVerifyLastUpdated { get; set; }
+        public DateTime? FaceRecognizeLastUpdated { get; set; }
         public virtual List<FaceDetection>? FaceDetections { get; set; }
         public bool HasPerson { get; set; }
 
@@ -53,7 +53,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public int ProcessThumbStatus { get; set; }
         public int DetectObjectStatus { get; set; }
         public int DetectFaceStatus { get; set; }
-        public int VerifyFaceStatus { get; set; }
+        public int RecognizeFaceStatus { get; set; }
 
         
     }

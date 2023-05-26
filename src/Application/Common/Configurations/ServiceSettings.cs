@@ -33,6 +33,7 @@ public class ServiceSettings
     /// </summary>
     public bool EnableObjectDetect { get; set; }
 
-
+    public bool EnableFaceDetection { get; set; }
+    public bool EnableFaceRecognition { get; set; }
 }
 
