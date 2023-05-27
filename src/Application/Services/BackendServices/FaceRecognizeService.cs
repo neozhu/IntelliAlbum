@@ -1,6 +1,7 @@
 ﻿using CleanArchitecture.Blazor.Application.Common.Configurations;
 using CleanArchitecture.Blazor.Application.Common.Utils;
 using CleanArchitecture.Blazor.Application.Services.BackendServices;
+using CleanArchitecture.Blazor.Domain.Entities;
 using FluentEmail.Core;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
@@ -334,6 +335,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
                         if (!image.ImageTags.Any(x => x.Keyword == tag.Keyword))
                         {
                             image.ImageTags.Add(tag);
+                            image.Keywords += $" {tag.Keyword}";
                         }
                     }
                     

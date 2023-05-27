@@ -351,6 +351,7 @@ public class MetaDataService
         }
 
         image.MetaData = imgMetaData;
+        image.Keywords += $"{imgMetaData.Caption} {imgMetaData.Description} {imgMetaData.Camera?.Model} {imgMetaData.Camera?.Make} {imgMetaData.Lens?.Model} {imgMetaData.Rating} ";  
         return imgMetaData;
     }
 

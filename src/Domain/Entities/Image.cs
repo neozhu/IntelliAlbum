@@ -55,6 +55,8 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public int DetectFaceStatus { get; set; }
         public int RecognizeFaceStatus { get; set; }
 
+
+        public string? Keywords { get; set; }
         
     }
 }
