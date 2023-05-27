@@ -21,6 +21,15 @@
 
 <ErrorBoundary>
     <ChildContent>
+        @if (!string.IsNullOrEmpty(_currentDto.Name))
+        {
+            <MudGrid Spacing="2">
+                <MudItem lg="2" md="3" sm="4">
+                    <ImageCard Image="@_currentDto" ThumbSize="ThumbSize.Large"></ImageCard>
+                </MudItem>
+            </MudGrid>
+
+        }
         <MudDataGrid ServerData="@(ServerReload)"
                      FixedHeader="true"
                      FixedFooter="true"
@@ -273,15 +282,7 @@
                 <MudDataGridPager PageSizeOptions="@(new int[]{10,15,30,50,100,500,1000})" />
             </PagerContent>
         </MudDataGrid>
-        @if (!string.IsNullOrEmpty(_currentDto.Name))
-        {
-            <MudGrid Spacing="2">
-                <MudItem lg="2" md="3" sm="4">
-                <ImageCard Image="@_currentDto" ThumbSize="ThumbSize.Large"></ImageCard>
-                </MudItem>
-            </MudGrid>
-            
-        }
+       
         
     </ChildContent>
     <ErrorContent>

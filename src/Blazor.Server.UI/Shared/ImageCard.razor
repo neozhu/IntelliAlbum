@@ -1,24 +1,19 @@
 ﻿@using CleanArchitecture.Blazor.Application.Features.Images.DTOs;
 @inject IStringLocalizer<SharedResource> L
-<MudCard Class="@className" Elevation="3">
-  @*  <div class="d-flex justify-center pa-0 ma-0">
-        <MudImage ObjectFit="ObjectFit.Cover"  Src="@(ImageUrl())" />
-    </div>*@
-
-
+<MudCard Class="@className" Elevation="2">
     <MudCardMedia Image="@(ImageUrl())" Height="200" />
     <MudCardContent>
-        <MudStack Row="true"  AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
+        <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
             <div class="mud-link-disabled" style="color:#00000089">@Image.MetaData.DateTaken</div>
         </MudStack>
         <MudStack Row="true" Class="flex-wrap" Spacing="1">
-        @foreach(var tag in Image.ImageTags.Where(x=>!string.IsNullOrEmpty(x.Keyword)))
-        {
-            <MudChip Class="ma-0" Size="Size.Small">@tag.Keyword</MudChip>
+            @foreach (var tag in Image.ImageTags.Where(x => !string.IsNullOrEmpty(x.Keyword)))
+            {
+                <MudChip Class="ma-0" Size="Size.Small">@tag.Keyword</MudChip>
             }
         </MudStack>
         @if (_showMore)
-        {
+        {<div class="d-flex flex-column flex-wrap my-2">
             <MudText Typo="Typo.body2">@L["Image Metadata"]</MudText>
             @if (Image.MetaData.Camera is not null)
             {
@@ -40,7 +35,8 @@
             {
                 <MudText Typo="Typo.body2">ISO: @Image.MetaData.ISO</MudText>
             }
-
+                <MudRating Size="Size.Small" SelectedValue="@Image.MetaData.Rating" />
+            </div>
         }
     </MudCardContent>
     <MudCardActions>
@@ -58,7 +54,7 @@
 
     public string ImageUrl()
     {
-        var extension =new FileInfo(Image.Name).Extension;
+        var extension = new FileInfo(Image.Name).Extension;
         var baseName = Path.GetFileNameWithoutExtension(Image.Name);
         var thumbFileName = $"{baseName}_{GetSizePostFix(ThumbSize)}{extension}";
         return $"./thumbs/{thumbFileName}";

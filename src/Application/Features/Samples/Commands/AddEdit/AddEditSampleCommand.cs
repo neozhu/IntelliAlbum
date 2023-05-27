@@ -13,6 +13,9 @@ using Exadel.Compreface.DTOs.SubjectDTOs.AddSubject;
 using Exadel.Compreface.DTOs.FaceCollectionDTOs.AddSubjectExample;
 using Flurl;
 using Exadel.Compreface.DTOs.FaceCollectionDTOs.ListAllExampleSubject;
+using Exadel.Compreface.Services;
+using Exadel.Compreface.DTOs.FaceDetectionDTOs.FaceDetection;
+using CleanArchitecture.Blazor.Application.BackendServices;
 
 namespace CleanArchitecture.Blazor.Application.Features.Samples.Commands.AddEdit;
 
@@ -38,17 +41,23 @@ public class AddEditSampleCommand : IMapFrom<SampleDto>, ICacheInvalidatorReques
 
 public class AddEditSampleCommandHandler : IRequestHandler<AddEditSampleCommand, Result<int>>
 {
+    private readonly ImageSharpProcessor _imageSharpProcessor;
+    private readonly ILogger<AddEditSampleCommandHandler> _logger;
     private readonly IConfiguration _configuration;
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IStringLocalizer<AddEditSampleCommandHandler> _localizer;
     public AddEditSampleCommandHandler(
+        ImageSharpProcessor imageSharpProcessor,
+        ILogger<AddEditSampleCommandHandler> logger,
         IConfiguration configuration,
         IApplicationDbContext context,
         IStringLocalizer<AddEditSampleCommandHandler> localizer,
         IMapper mapper
         )
     {
+        _imageSharpProcessor = imageSharpProcessor;
+        _logger = logger;
         _configuration = configuration;
         _context = context;
         _localizer = localizer;
@@ -58,6 +67,11 @@ public class AddEditSampleCommandHandler : IRequestHandler<AddEditSampleCommand,
     {
 
         var dto = _mapper.Map<SampleDto>(request);
+        var result = await DetectFace(dto);
+        if (!string.IsNullOrEmpty(result))
+        {
+            return await Result<int>.FailureAsync(new string[] { result });
+        }
         if (request.Id > 0)
         {
             var item = await _context.Samples.FindAsync(new object[] { request.Id }, cancellationToken) ?? throw new NotFoundException($"Sample with id: [{request.Id}] not found.");
@@ -80,7 +94,56 @@ public class AddEditSampleCommandHandler : IRequestHandler<AddEditSampleCommand,
         }
 
     }
+    private async Task<string> DetectFace(SampleDto sample)
+    {
+        var endpoint = _configuration.GetValue<string>("CompareFaceApi:Endpoint");
+        var apikey = _configuration.GetValue<string>("CompareFaceApi:DetectionApiKey");
+        var uri = new Uri(endpoint);
+        var host = uri.Scheme + "://" + uri.Host;
+        var port = uri.Port.ToString();
+        var client = new CompreFaceClient(domain: host, port: port);
+        var detectService = client.GetCompreFaceService<DetectionService>(apikey);
+        foreach (var img in sample.SampleImages)
+        {
+            var file = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), img.Url));
+            if (file.Exists)
+            {
+                var faceDetectionRequestByFilePath = new FaceDetectionRequestByFilePath()
+                {
+                    FilePath = file.FullName,
+                    DetProbThreshold = 0.8m,
+                };
+                try
+                {
+                    var detectResponse = await detectService.DetectAsync(faceDetectionRequestByFilePath);
+                    if (detectResponse != null)
+                    {
+                        if (detectResponse.Result.Count == 1)
+                        {
+                            var bbox = detectResponse.Result[0].Box;
+                            await _imageSharpProcessor.GetCropFaceFile(file, bbox.XMin, bbox.YMin, bbox.XMax, bbox.YMax, file);
+                        }
+                        else if (detectResponse.Result.Count > 1)
+                        {
+                            return "More than one face in the image";
+                        }
+                        else
+                        {
+                            return "No face is found in the given image";
 
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Detect Face fault.");
+                    return e.Message;
+                }
+                
+            }
+        }
+        return string.Empty;
+    }
     private async Task<string> SyncToCompareFace(Sample sample)
     {
         try

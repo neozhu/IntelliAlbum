@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 **/wwwroot/thumbs/*
+**/Files/Samples/*
