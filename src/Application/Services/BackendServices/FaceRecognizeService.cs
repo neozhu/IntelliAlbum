@@ -329,7 +329,14 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
                     {
                         image.ImageTags = new List<Tag>();
                     }
-                    image.ImageTags.AddRange(nametag);
+                    foreach(var tag in nametag)
+                    {
+                        if (!image.ImageTags.Any(x => x.Keyword == tag.Keyword))
+                        {
+                            image.ImageTags.Add(tag);
+                        }
+                    }
+                    
                     image.RecognizeFaceStatus = 2;
                 }
             }

@@ -2,6 +2,7 @@
 
 @using BlazorDownloadFile
 @using CleanArchitecture.Blazor.Application.Features.Samples.Caching
+@using CleanArchitecture.Blazor.Application.Features.Samples.Commands.ReScan;
 @using CleanArchitecture.Blazor.Application.Features.Samples.DTOs
 @using CleanArchitecture.Blazor.Application.Features.Samples.Commands.Delete
 @using CleanArchitecture.Blazor.Application.Features.Samples.Queries.Export
@@ -68,6 +69,15 @@
                                                 OnClick="OnClone"
                                                 Style="margin-right: 4px; margin-bottom:4px"
                                                 IconColor="Color.Surface">@ConstantString.Clone</MudButton>
+                                }
+                                @if (_canRecognitionScan)
+                                {
+                                    <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Error"
+                                           StartIcon="@Icons.Material.Filled.Scanner"
+                                           Size="Size.Small"
+                                           Style="margin-right: 4px; margin-bottom:4px"
+                                           OnClick="OnRecognitionScan"
+                                           IconColor="Color.Surface">@L["Recognition Scan"]</MudButton>
                                 }
                                 @if (_canDelete)
                                 {
@@ -228,7 +238,7 @@
     private bool _canDelete;
     private bool _canImport;
     private bool _canExport;
-
+    private bool _canRecognitionScan;
     protected override async Task OnInitializedAsync()
     {
         Title = L[_currentDto.GetClassDescription()];
@@ -239,6 +249,7 @@
         _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Samples.Delete)).Succeeded;
         _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Samples.Import)).Succeeded;
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Samples.Export)).Succeeded;
+        _canRecognitionScan = (await AuthService.AuthorizeAsync(state.User, Permissions.Samples.RecognitionScan)).Succeeded;
     }
     private async Task<GridData<SampleDto>> ServerReload(GridState<SampleDto> state)
     {
@@ -331,7 +342,22 @@
             await _table.ReloadServerData();
         }
     }
+    private async Task OnRecognitionScan()
+    {
 
+        var parameters = new DialogParameters
+           {
+             { nameof(ConfirmationDialog.ContentText),string.Format(L["Are you sure you want to rescan recognition"]) }
+           };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<ConfirmationDialog>(L["Confrim"], parameters, options);
+        var state = await dialog.Result;
+        if (!state.Canceled)
+        {
+            var result = await Mediator.Send(new ReScanRecognitionCommand());
+            Snackbar.Add($"Commit {result.Data} success, please waiting for complete.", MudBlazor.Severity.Info);
+        }
+    }
     private async Task OnDelete(SampleDto dto)
     {
         var command = new DeleteSampleCommand(new int[] { dto.Id });

@@ -321,6 +321,7 @@
     private bool _canImport;
     private bool _canExport;
 
+
     protected override async Task OnInitializedAsync()
     {
         Title = L[_currentDto.GetClassDescription()];
@@ -331,6 +332,7 @@
         _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Delete)).Succeeded;
         _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Import)).Succeeded;
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Export)).Succeeded;
+     
     }
     private async Task OnPreview(ImageDto dto)
     {

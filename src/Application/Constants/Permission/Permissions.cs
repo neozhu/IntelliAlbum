@@ -16,6 +16,7 @@ public static class Permissions
         public const string Search = "Permissions.Samples.Search";
         public const string Export = "Permissions.Samples.Export";
         public const string Import = "Permissions.Samples.Import";
+        public const string RecognitionScan= "Permissions.Samples.RecognitionScan";
     }
     [DisplayName("Folders")]
     [Description("Folders Permissions")]
