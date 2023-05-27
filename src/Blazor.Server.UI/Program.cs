@@ -46,7 +46,7 @@ else
     app.UseHsts();
 }
 // Prime the cache
-//app.Services.GetRequiredService<ImageCache>().WarmUp().Wait();
+app.Services.GetRequiredService<ImageCache>().WarmUp().Wait();
 
 var workservice = app.Services.GetRequiredService<WorkService>();
 workservice.StartService();

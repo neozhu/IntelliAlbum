@@ -332,16 +332,14 @@
         _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Delete)).Succeeded;
         _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Import)).Succeeded;
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Export)).Succeeded;
-     
+
     }
     private async Task OnPreview(ImageDto dto)
     {
-        if (dto.ThumbImages?.Any() ?? false)
-        {
-            var url = $"./thumbs/{dto.ThumbImages.First().Name}";
-            var list = dto.ThumbImages.Select(x => $"./thumbs/{x.Name}").ToArray();
-            await JS.InvokeVoidAsync("previewImage", url, list);
-        }
+
+        var url = $"/rawimage/{dto.Id}";
+        await JS.InvokeVoidAsync("previewRawImage", url);
+      
 
     }
     private async Task<GridData<ImageDto>> ServerReload(GridState<ImageDto> state)

@@ -1,5 +1,6 @@
 ﻿using CleanArchitecture.Blazor.Application.Common.Configurations;
 using CleanArchitecture.Blazor.Application.Common.Utils;
+using CleanArchitecture.Blazor.Application.Services.BackendServices;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
@@ -30,6 +31,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
     private readonly ImageProcessService _imageProcessingService;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ServiceSettings _serviceSettings;
+    private readonly ImageCache _imageCache;
     private readonly ILogger<ThumbnailService> _logger;
     private readonly IStatusService _statusService;
     private readonly WorkService _workService;
@@ -37,6 +39,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
 
     public ThumbnailService(IServiceScopeFactory scopeFactory,
         ServiceSettings  serviceSettings,
+        ImageCache imageCache,
         ILogger<ThumbnailService> logger,
         IStatusService statusService,
         ImageProcessService imageService,
@@ -45,6 +48,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
        
         _scopeFactory = scopeFactory;
         _serviceSettings = serviceSettings;
+        _imageCache = imageCache;
         _logger = logger;
         _statusService = statusService;
         _imageProcessingService = imageService;
@@ -402,7 +406,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
         // Mark the image as done, so that if anything goes wrong it won't go into an infinite loop spiral
         sourceImage.ThumbLastUpdated = DateTime.UtcNow;
         var result = await ConvertFile(sourceImage, forceRegeneration);
-        //_imageCache.Evict(sourceImage.Id);
+        _imageCache.Evict(sourceImage.Id);
         return result;
     }
 
@@ -431,6 +435,7 @@ public class ThumbnailService : IProcessJobFactory, IRescanProvider
         //               .SetProperty(y => y.ProcessThumbStatus, y => image.ProcessThumbStatus));
         db.Images.Update(image);
         await db.SaveChangesAsync(CancellationToken.None);
+        _imageCache.Evict(image.Id);
         return result;
     }
 

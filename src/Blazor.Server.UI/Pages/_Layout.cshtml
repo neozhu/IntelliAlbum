@@ -22,11 +22,12 @@
             box-shadow: 0 9px 11.5px -3px rgba(0,0,0,.1), 0 18.5px 28.5px 0 rgba(0,0,0,.03375), 0 7px 37.5px 0 rgba(0,0,0,.02625);
         }
 
-    
+
         .fancybox__container {
             --fancybox-bg: rgba(24, 24, 27, 0.85);
             z-index: 9999;
         }
+
         .mud-input {
             font-size: 0.8125rem;
         }
@@ -43,13 +44,14 @@
             font-size: var(--mud-typography-default-size);
         }
 
-        .mud-typography-body1{
+        .mud-typography-body1 {
             font-size: var(--mud-typography-default-size);
         }
 
-        .mud-button-outlined-size-small{
+        .mud-button-outlined-size-small {
             font-size: var(--mud-typography-default-size);
         }
+
         #blazor-error-ui {
             background: lightyellow;
             background-color: var(--mud-palette-error);
@@ -75,7 +77,7 @@
             left: 0;
             padding: 0.6rem 1.25rem 0.7rem 1.25rem;
             padding: 0.6rem 1.75rem 0.7rem 1.25rem;
-            margin:0px;
+            margin: 0px;
             position: fixed;
             width: 100%;
             z-index: 9999;
@@ -214,17 +216,17 @@
                         const color = '#FFFFFF';
                         const imageDiffVert = 25 + 2;
                         return `
-                        <div style='width:${d.width }px;height:${d.height}px;padding-top:${imageDiffVert - 2}px;padding-left:1px;padding-right:1px'>
-                                <div style="font-family: 'Inter', sans-serif;background-color:${color};  margin-left:-1px;width:${d.width - 2}px;height:${d.height - imageDiffVert}px;border-radius:10px;border: 1px solid #E4E2E9">
-                                            <div style="display:flex;justify-content:flex-end;margin-top:5px;margin-right:8px">#${d.data.id.slice(-3)}</div>
-                                    <div style="background-color:${color};margin-top:${-imageDiffVert - 20}px;margin-left:${15}px;border-radius:100px;width:50px;height:50px;" ></div>
-                                    <div style="margin-top:${-imageDiffVert - 20}px;">   <img src=" ${d.data.profileUrl}" style="margin-left:${20}px;border-radius:100px;width:40px;height:40px;" /></div>
-                                    <div style="font-size:15px;color:#08011E;margin-left:20px;margin-top:10px">  ${d.data.name} </div>
-                                            <div style="color:#716E7B;margin-left:20px;margin-top:3px;font-size:10px;"> ${d.data.positionName } </div>
+                                        <div style='width:${d.width}px;height:${d.height}px;padding-top:${imageDiffVert - 2}px;padding-left:1px;padding-right:1px'>
+                                                <div style="font-family: 'Inter', sans-serif;background-color:${color};  margin-left:-1px;width:${d.width - 2}px;height:${d.height - imageDiffVert}px;border-radius:10px;border: 1px solid #E4E2E9">
+                                                            <div style="display:flex;justify-content:flex-end;margin-top:5px;margin-right:8px">#${d.data.id.slice(-3)}</div>
+                                                    <div style="background-color:${color};margin-top:${-imageDiffVert - 20}px;margin-left:${15}px;border-radius:100px;width:50px;height:50px;" ></div>
+                                                    <div style="margin-top:${-imageDiffVert - 20}px;">   <img src=" ${d.data.profileUrl}" style="margin-left:${20}px;border-radius:100px;width:40px;height:40px;" /></div>
+                                                    <div style="font-size:15px;color:#08011E;margin-left:20px;margin-top:10px">  ${d.data.name} </div>
+                                                            <div style="color:#716E7B;margin-left:20px;margin-top:3px;font-size:10px;"> ${d.data.positionName} </div>
 
-                                </div>
-                            </div>
-                                    `;
+                                                </div>
+                                            </div>
+                                                    `;
                     })
                     .container('.chart-container')
                     .data(orgdata)
@@ -236,10 +238,45 @@
                 }
             }, 50);
         }
+        function previewRawImage(url) {
+            if (url == null) return;
+            console.log(url);
+            var images = 
+                [{
+                    src: url,
+                    download: url,
+                    caption: url.split("/").pop(),
+                    type: "image",
+                    initialSize: "fit",
 
+                }];
+         
+            const fancybox = new Fancybox(images, {
+                Images: {
+                    initialSize: "fit",
+                    Panzoom: {
+                        maxScale: 3,
+                    },
+                },
+                Toolbar: {
+                    display: {
+                        left: ["infobar"],
+                        middle: ["zoomIn",
+                            "zoomOut",
+                            "toggle1to1",
+                            "rotateCCW",
+                            "rotateCW",
+                            "flipX",
+                            "flipY",],
+                        right: ["slideshow", "fullscreen", "download", "close"],
+                    },
+                },
+            });
+
+        }
         function previewImage(url, gallery) {
- 
-            if (url ==null) return;
+
+            if (url == null) return;
             console.log(url, gallery);
             if (isImageUrl(url)) {
                 let images = [];
@@ -261,11 +298,11 @@
             const imageExtensions = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i;
             return imageExtensions.test(url);
         }
-       function isValidUrl(str) {
+        function isValidUrl(str) {
             if (str == null) {
                 return false;
             }
-            const urlRegex  =/^([a-zA-Z]:)?(\\[a-zA-Z0-9\s_@@-~]+)+\.[a-zA-Z]{2,6}$/;
+            const urlRegex = /^([a-zA-Z]:)?(\\[a-zA-Z0-9\s_@@-~]+)+\.[a-zA-Z]{2,6}$/;
             return urlRegex.test(str);
         }
     </script>
