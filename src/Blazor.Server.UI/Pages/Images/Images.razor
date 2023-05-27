@@ -30,6 +30,9 @@
             </MudGrid>
 
         }
+
+        <Blazor.Server.UI.Pages.Images.Components.ImagesAdvancedSearchComponent OnConditionChanged="ConditionChanged" TRequest="@Query"></Blazor.Server.UI.Pages.Images.Components.ImagesAdvancedSearchComponent>
+
         <MudDataGrid ServerData="@(ServerReload)"
                      FixedHeader="true"
                      FixedFooter="true"
@@ -337,7 +340,7 @@
             var list = dto.ThumbImages.Select(x => $"./thumbs/{x.Name}").ToArray();
             await JS.InvokeVoidAsync("previewImage", url, list);
         }
-        
+
     }
     private async Task<GridData<ImageDto>> ServerReload(GridState<ImageDto> state)
     {
@@ -356,6 +359,10 @@
             _loading = false;
         }
 
+    }
+    private async Task ConditionChanged(string text)
+    {
+        await _table.ReloadServerData();
     }
     private async Task OnSearch(string text)
     {

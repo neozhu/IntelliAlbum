@@ -9,15 +9,25 @@ namespace CleanArchitecture.Blazor.Application.Features.Images.Queries.Paginatio
 
 public class ImagesWithPaginationQuery : PaginationFilterBase, ICacheableRequest<PaginatedData<ImageDto>>
 {
-    [CompareTo("Name", "Description")] // <-- This filter will be applied to Name or Description.
+    [CompareTo("Name", "Comments")] // <-- This filter will be applied to Name or Description.
     [StringFilterOptions(StringFilterOption.Contains)]
     public string? Keyword { get; set; }
+    [Description("Search for creation date")]
+    [CompareTo("FileCreationDate")]
+    public Range<DateTime>? FileCreationDate { get; set; }
+    [Description("Search for recently view date")]
+    [CompareTo("RecentlyViewDatetime")]
+    public Range<DateTime>? RecentlyViewDatetime { get; set; }
+    [Description("Search for folder")]
+    [CompareTo("FolderId")]
+    public int? FolderId { get; set; }
+
     [CompareTo(typeof(SearchImagesWithListView), "Id")]
     public ImageListView ListView { get; set; } = ImageListView.All; //<-- When the user selects a different ListView,
                                                                                // a custom query expression is executed on the filter.
     public override string ToString()
     {
-        return $"Listview:{ListView},Search:{Keyword},Sort:{Sort},SortBy:{SortBy},{Page},{PerPage}";
+        return $"Listview:{ListView},Search:{Keyword},Sort:{Sort},SortBy:{SortBy},{Page},{PerPage},{FolderId},{FileCreationDate?.ToString()},{RecentlyViewDatetime?.ToString()}";
     }
     [IgnoreFilter]
     public string CacheKey => ImageCacheKey.GetPaginationCacheKey($"{this}");
