@@ -1,0 +1,11 @@
+version: '3'
+services:
+  yolov8_fastapi:
+    build: .
+    restart: "always"
+    volumes:
+    - ./:/app
+    working_dir: /app
+    ports:
+      - "8010:8010"
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8010
