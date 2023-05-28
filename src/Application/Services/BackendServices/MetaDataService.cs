@@ -296,8 +296,9 @@ public class MetaDataService
                     var caption = IPTCdir.SafeExifGetString(IptcDirectory.TagCaption).SafeTrim();
                     var byline = IPTCdir.SafeExifGetString(IptcDirectory.TagByLine).SafeTrim();
                     var source = IPTCdir.SafeExifGetString(IptcDirectory.TagSource).SafeTrim();
-
+                    var category = IPTCdir.SafeExifGetString(IptcDirectory.TagCategory).SafeTrim();
                     imgMetaData.Caption = caption;
+                    imgMetaData.Category = category;
                     if (!string.IsNullOrEmpty(imgMetaData.Copyright))
                         imgMetaData.Copyright = IPTCdir.SafeExifGetString(IptcDirectory.TagCopyrightNotice).SafeTrim();
                     imgMetaData.Credit = IPTCdir.SafeExifGetString(IptcDirectory.TagCredit).SafeTrim();
@@ -351,7 +352,7 @@ public class MetaDataService
         }
 
         image.MetaData = imgMetaData;
-        image.Keywords += $"{imgMetaData.Caption} {imgMetaData.Description} {imgMetaData.Camera?.Model} {imgMetaData.Camera?.Make} {imgMetaData.Lens?.Model} {imgMetaData.Rating} ";  
+        image.Keywords = $"{imgMetaData}";  
         return imgMetaData;
     }
 

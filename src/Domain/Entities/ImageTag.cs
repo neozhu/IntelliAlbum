@@ -9,5 +9,10 @@ namespace CleanArchitecture.Blazor.Domain.Entities
     public class Tag
     {
         public string Keyword { get; set; } = null!;
+
+        public override string ToString()
+        {
+            return $"{Keyword}";
+        }
     }
 }

@@ -10,5 +10,10 @@ namespace CleanArchitecture.Blazor.Domain.Entities
     {
         public string Label { get; set; } = null!;
         public double Score { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Label}";
+        }
     }
 }

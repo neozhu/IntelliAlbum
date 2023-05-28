@@ -366,7 +366,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                             image.DetectObjectStatus = 3;
                         }
                         image.ImageObjects = imageObjects;
-                        image.Keywords += $"{string.Join(' ',imageObjects.Select(x=>x.Tag.Keyword).Distinct())}";
+                        image.Keywords = $"{image.MetaData} {string.Join(' ', imageObjects.Select(x=>x.Tag.Keyword))}";
                     }
                     catch (Exception ex)
                     {

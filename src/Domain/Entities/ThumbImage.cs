@@ -12,5 +12,10 @@ namespace CleanArchitecture.Blazor.Domain.Entities;
         public ObjectTypes Types { get; set; } = ObjectTypes.Object;
         public string? ThumbSize { get; set; }
         public required string Url { get; set; }
+
+    public override string ToString()
+    {
+        return $"{Name}"; 
     }
+}
 

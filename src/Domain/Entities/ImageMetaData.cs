@@ -51,6 +51,11 @@ public class ImageMetaData
     public virtual List<DirectoryBase>? EXIFData { get; set; }
 
     public string? MimeType { get; set; }
+    public string? Category { get; set; }
+    public override string ToString()
+    {
+        return $"{MimeType} {Category} {Caption} {Description} { Copyright} {ISO} {FNum } {Exposure} {Camera?.Model} {Lens?.Model} {DateTaken}";
+    }
 
 }
 

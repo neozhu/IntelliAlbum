@@ -335,10 +335,10 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
                         if (!image.ImageTags.Any(x => x.Keyword == tag.Keyword))
                         {
                             image.ImageTags.Add(tag);
-                            image.Keywords += $" {tag.Keyword}";
+                            
                         }
                     }
-                    
+                    image.Keywords = $" {image.MetaData} {string.Join(' ', image.ImageObjects.Select(x=>x.Tag?.Keyword))} {string.Join(' ', nametag.Select(x=>x.Keyword))}";
                     image.RecognizeFaceStatus = 2;
                 }
             }

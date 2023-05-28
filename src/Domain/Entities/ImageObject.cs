@@ -18,6 +18,9 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public int RectWidth { get; set; }
         public int RectHeight { get; set; }
 
-        
+        public override string ToString()
+        {
+            return $"{Tag?.Keyword} {Type} {Name} {Description}";
+        }
     }
 }
