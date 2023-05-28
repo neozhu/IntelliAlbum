@@ -1,6 +1,7 @@
 ﻿@page "/pages/Images"
 
 @using BlazorDownloadFile
+@using CleanArchitecture.Blazor.Application.BackendServices;
 @using CleanArchitecture.Blazor.Application.Features.Images.Caching
 @using CleanArchitecture.Blazor.Application.Features.Images.DTOs
 @using CleanArchitecture.Blazor.Application.Features.Images.Commands.Delete
@@ -8,6 +9,8 @@
 @using CleanArchitecture.Blazor.Application.Features.Images.Queries.Export
 @using CleanArchitecture.Blazor.Application.Features.Images.Queries.Pagination
 @using CleanArchitecture.Blazor.Application.Features.Images.Commands.Update
+@using Microsoft.AspNetCore.Http.Connections;
+@using Microsoft.AspNetCore.SignalR.Client;
 
 @inject IJSRuntime JS
 @inject IStringLocalizer<Images> L
@@ -142,9 +145,19 @@
                 <PropertyColumn Property="x => x.MetaData" Title="@L[_currentDto.GetMemberDescription(x=>x.MetaData)]">
                     <CellTemplate>
                         <div class="d-flex flex-row">
-                            <MudChip>@context.Item.MetaData.MimeType</MudChip>
-                            <MudChip>@context.Item.MetaData.Camera?.Model</MudChip>
-                            <MudChip>@context.Item.MetaData.Lens?.Model</MudChip>
+                            @if (!string.IsNullOrEmpty(context.Item.MetaData.MimeType))
+                            {
+                                <MudChip>@context.Item.MetaData.MimeType</MudChip>
+                            }
+                            @if(context.Item.MetaData.Camera  is not null)
+                            {
+                                <MudChip>@context.Item.MetaData.Camera?.Model</MudChip>
+                            }
+                            @if (context.Item.MetaData.Lens is not null)
+                            {
+                                <MudChip>@context.Item.MetaData.Lens?.Model</MudChip>
+                            }
+                                             
                             @if (!string.IsNullOrEmpty(context.Item.MetaData.Caption))
                             {
                                 <MudChip>@context.Item.MetaData.Caption</MudChip>
@@ -314,6 +327,7 @@
     private ImagesWithPaginationQuery Query { get; set; } = new();
     [Inject]
     private IBlazorDownloadFileService BlazorDownloadFileService { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager{ get; set; }
     private bool _canSearch;
     private bool _canCreate;
     private bool _canEdit;
@@ -321,7 +335,7 @@
     private bool _canImport;
     private bool _canExport;
 
-
+    private  HubConnection _hubConnection;
     protected override async Task OnInitializedAsync()
     {
         Title = L[_currentDto.GetClassDescription()];
@@ -332,6 +346,14 @@
         _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Delete)).Succeeded;
         _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Import)).Succeeded;
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Export)).Succeeded;
+        var hubUrl = NavigationManager.ToAbsoluteUri(NotificationHub.NotificationRoot);
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(hubUrl, options =>
+            {
+                options.Transports = HttpTransportType.WebSockets;
+            })
+            .Build();
+        await _hubConnection.StartAsync();
 
     }
     private async Task OnPreview(ImageDto dto)

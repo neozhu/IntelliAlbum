@@ -1,3 +1,4 @@
+using CleanArchitecture.Blazor.Application.BackendServices;
 using CleanArchitecture.Blazor.Infrastructure.Constants.Localization;
 using CleanArchitecture.Blazor.Infrastructure.Hubs;
 using Hangfire;
@@ -46,6 +47,7 @@ public static class ApplicationBuilderExtensions
             endpoints.MapRazorPages();
             endpoints.MapControllers();
             endpoints.MapHub<SignalRHub>(SignalR.HubUrl);
+            endpoints.MapHub<NotificationHub>(NotificationHub.NotificationRoot);
         });
 
         return app;
