@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 namespace CleanArchitecture.Blazor.Application.BackendServices;
 public class ServerNotifierService
 {
-    private readonly IHubContext<NotificationHub> _hubContext;
+    private readonly IHubContext<NotificationHub, INotificationHub> _hubContext;
     private readonly ILogger<ServerNotifierService> _logger;
 
-    public ServerNotifierService(IHubContext<NotificationHub> hubContext, ILogger<ServerNotifierService> logger)
+    public ServerNotifierService(IHubContext<NotificationHub, INotificationHub> hubContext, ILogger<ServerNotifierService> logger)
     {
         _hubContext = hubContext;
         _logger = logger;
@@ -26,7 +26,7 @@ public class ServerNotifierService
         if (payloadMsg is null)
             payloadMsg = string.Empty;
 
-        await _hubContext.Clients.All.SendAsync(methodName, payloadMsg);
+        await _hubContext.Clients.All.SendMessage(methodName, payloadMsg);
     }
 
     public async Task NotifyClients<T>(NotificationType type, T payloadObject) where T : class
@@ -40,7 +40,7 @@ public class ServerNotifierService
         {
             var json = JsonSerializer.Serialize(payloadObject, DefaultJsonSerializerOptions.Options);
 
-            await _hubContext.Clients.All.SendAsync(methodName, json);
+            await _hubContext.Clients.All.SendMessage(methodName, json);
         }
         catch (Exception ex)
         {

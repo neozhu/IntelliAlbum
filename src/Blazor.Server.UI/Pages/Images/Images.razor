@@ -14,6 +14,7 @@
 
 @inject IJSRuntime JS
 @inject IStringLocalizer<Images> L
+@implements IAsyncDisposable
 @attribute [Authorize(Policy = Permissions.Images.View)]
 <PageTitle>@Title</PageTitle>
 <style>
@@ -353,8 +354,32 @@
                 options.Transports = HttpTransportType.WebSockets;
             })
             .Build();
+        _hubConnection.On<string, string>(NotificationHub.OnSendMessage, HandleReceiveNotification);
         await _hubConnection.StartAsync();
 
+    }
+    public  async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await _hubConnection.StopAsync();
+        }
+        finally
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+    private async Task HandleReceiveNotification(string type, string json)
+    {
+        Console.WriteLine(type, json);
+        InvokeAsync(() => {
+            Snackbar.Add($"{type} - {json}", MudBlazor.Severity.Info);
+        });
+
+        if (type == "WorkStatusChanged" && json.Contains("idle"))
+        {
+            await _table.ReloadServerData();
+        }
     }
     private async Task OnPreview(ImageDto dto)
     {

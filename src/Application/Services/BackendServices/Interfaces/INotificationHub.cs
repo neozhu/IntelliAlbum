@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CleanArchitecture.Blazor.Application.Services.BackendServices
+namespace CleanArchitecture.Blazor.Application.BackendServices
 {
     public interface INotificationHub
     {
