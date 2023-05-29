@@ -13,28 +13,29 @@
             }
         </MudStack>
         @if (_showMore)
-        {<div class="d-flex flex-column flex-wrap my-2">
-            <MudText Typo="Typo.body2">@L["Image Metadata"]</MudText>
-            @if (Image.MetaData.Camera is not null)
-            {
-                <MudText Typo="Typo.body2">@Image.MetaData.Camera.Model</MudText>
-            }
-            @if (Image.MetaData.Lens is not null)
-            {
-                <MudText Typo="Typo.body2">@Image.MetaData.Lens.Model</MudText>
-            }
-            @if (Image.MetaData.Caption is not null)
-            {
-                <MudText Typo="Typo.body2">@Image.MetaData.Caption</MudText>
-            }
-            @if (Image.MetaData.MimeType is not null)
-            {
-                <MudText Typo="Typo.body2">Mime Type: @Image.MetaData.MimeType</MudText>
-            }
-            @if (Image.MetaData.ISO is not null)
-            {
-                <MudText Typo="Typo.body2">ISO: @Image.MetaData.ISO</MudText>
-            }
+        {
+            <div class="d-flex flex-column flex-wrap my-2 gap-x-1">
+                <MudText Typo="Typo.body2">@L["Image Metadata"]</MudText>
+                @if (Image.MetaData.Camera is not null)
+                {
+                    <MudText Typo="Typo.body2">@Image.MetaData.Camera.Model</MudText>
+                }
+                @if (Image.MetaData.Lens is not null)
+                {
+                    <MudText Typo="Typo.body2">@Image.MetaData.Lens.Model</MudText>
+                }
+                @if (Image.MetaData.Caption is not null)
+                {
+                    <MudText Typo="Typo.body2">@Image.MetaData.Caption</MudText>
+                }
+                @if (Image.MetaData.MimeType is not null)
+                {
+                    <MudText Typo="Typo.body2">Mime Type: @Image.MetaData.MimeType</MudText>
+                }
+                @if (Image.MetaData.ISO is not null)
+                {
+                    <MudText Typo="Typo.body2">ISO: @Image.MetaData.ISO</MudText>
+                }
                 <MudRating Size="Size.Small" SelectedValue="@Image.MetaData.Rating" />
             </div>
         }

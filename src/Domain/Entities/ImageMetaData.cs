@@ -52,9 +52,10 @@ public class ImageMetaData
 
     public string? MimeType { get; set; }
     public string? Category { get; set; }
+    public string? City { get; set; }
     public override string ToString()
     {
-        return $"{MimeType} {Category} {Caption} {Description} { Copyright} {ISO} {FNum } {Exposure} {Camera?.Model} {Lens?.Model} {DateTaken}";
+        return $"{MimeType} {Category} {Caption} {Description} {City} { Copyright} {ISO} {FNum } {Exposure} {Camera?.Model} {Lens?.Model} {DateTaken}";
     }
 
 }

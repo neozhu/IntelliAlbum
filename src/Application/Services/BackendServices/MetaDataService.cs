@@ -297,8 +297,10 @@ public class MetaDataService
                     var byline = IPTCdir.SafeExifGetString(IptcDirectory.TagByLine).SafeTrim();
                     var source = IPTCdir.SafeExifGetString(IptcDirectory.TagSource).SafeTrim();
                     var category = IPTCdir.SafeExifGetString(IptcDirectory.TagCategory).SafeTrim();
+                    var city = IPTCdir.SafeExifGetString(IptcDirectory.TagCity).SafeTrim();
                     imgMetaData.Caption = caption;
                     imgMetaData.Category = category;
+                    imgMetaData.City = city;
                     if (!string.IsNullOrEmpty(imgMetaData.Copyright))
                         imgMetaData.Copyright = IPTCdir.SafeExifGetString(IptcDirectory.TagCopyrightNotice).SafeTrim();
                     imgMetaData.Credit = IPTCdir.SafeExifGetString(IptcDirectory.TagCredit).SafeTrim();
