@@ -44,16 +44,28 @@
         }
     </MudCardContent>
     <MudCardActions>
-        <MudButton StartIcon="@Icons.Material.Filled.ShoppingCartCheckout" Variant="Variant.Text" Color="Color.Primary">@L["Select"]</MudButton>
-        <MudButton Variant="Variant.Text" OnClick="@(()=>_showMore=!_showMore)" Color="Color.Primary">@L["More"]</MudButton>
+        <MudTooltip Text="@L["Preview"]">
+            <MudIconButton Icon="@Icons.Material.Filled.Camera" OnClick="PreviewClick" Variant="Variant.Text" Color="Color.Primary"></MudIconButton>
+        </MudTooltip>
+       <MudTooltip Text="@L["Select"]">
+        <MudIconButton Icon="@Icons.Material.Filled.ShoppingCartCheckout" Variant="Variant.Text" Color="Color.Primary"></MudIconButton>
+        </MudTooltip>
+        <MudTooltip Text="@L["More"]">
+            <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" Variant="Variant.Text" OnClick="@(()=>_showMore=!_showMore)" Color="Color.Primary"></MudIconButton>
+        </MudTooltip>
     </MudCardActions>
 </MudCard>
 @code {
     private string className => "image-card";
     [Parameter]
+    [EditorRequired]
     public ImageDto Image { get; set; }
     [Parameter]
+    [EditorRequired]
     public ThumbSize ThumbSize { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public EventCallback<int> OnPreview { get; set; }
     private bool _showMore = false;
 
     public string ImageUrl()
@@ -74,6 +86,10 @@
             ThumbSize.Small => 180,
             _ => 180
         };
+    }
+    private async Task PreviewClick()
+    {
+        await OnPreview.InvokeAsync(Image.Id);
     }
     private string GetSizePostFix(ThumbSize size)
     {

@@ -68,7 +68,7 @@
         </MudGrid>
         @if (searching)
         {
-            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-2" />
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-2"  />
         }
         else
         {
@@ -78,7 +78,7 @@
                     @foreach(var img in images)
                     {
                         <MudItem xs="@xs">
-                            <ImageCard Image="@img" ThumbSize="@thumbSize"></ImageCard>
+                            <ImageCard  Image="@img" ThumbSize="@thumbSize" OnPreview="OnPreview"></ImageCard>
                         </MudItem>
                     }
                 </MudGrid>
@@ -128,7 +128,13 @@
         }
 
     }
+    public async void OnPreview(int imageId)
+    {
+        var index = images.FindIndex(x => x.Id == imageId);
+        var src = images.Select(x => $"/rawimage/{x.Id}").ToArray();
+        var thumbsrc = images.Select(x => $"/thumb/{thumbSize}/{x.Id}").ToArray();
 
+    }
     private async Task OnChangedListView(ImageListView view)
     {
         listview = view;
