@@ -1,7 +1,7 @@
 ﻿@using CleanArchitecture.Blazor.Application.Features.Images.DTOs;
 @inject IStringLocalizer<SharedResource> L
 <MudCard Class="@className" Elevation="2">
-    <MudCardMedia Image="@(ImageUrl())" Height="200" />
+    <MudCardMedia Image="@(ImageUrl())" Height="getHeight()" />
     <MudCardContent>
         <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
             <div class="mud-link-disabled" style="color:#00000089">@Image.MetaData.DateTaken</div>
@@ -59,6 +59,18 @@
         var baseName = Path.GetFileNameWithoutExtension(Image.Name);
         var thumbFileName = $"{baseName}_{GetSizePostFix(ThumbSize)}{extension}";
         return $"./thumbs/{thumbFileName}";
+    }
+    private int getHeight()
+    {
+        return ThumbSize switch
+        {
+            ThumbSize.ExtraLarge => 500,
+            ThumbSize.Large => 430,
+            ThumbSize.Big => 400,
+            ThumbSize.Medium => 300,
+            ThumbSize.Small => 180,
+            _ => 180
+        };
     }
     private string GetSizePostFix(ThumbSize size)
     {
