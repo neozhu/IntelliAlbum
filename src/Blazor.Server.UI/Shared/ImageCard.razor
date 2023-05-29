@@ -6,12 +6,15 @@
         <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
             <div class="mud-link-disabled" style="color:#00000089">@Image.MetaData.DateTaken</div>
         </MudStack>
-        <MudStack Row="true" Class="flex-wrap" Spacing="1">
-            @foreach (var tag in Image.ImageTags.Where(x => !string.IsNullOrEmpty(x.Keyword)))
-            {
-                <MudChip Class="ma-0" Size="Size.Small">@tag.Keyword</MudChip>
-            }
-        </MudStack>
+        @if (Image.ImageTags is not null)
+        {
+            <MudStack Row="true" Class="flex-wrap" Spacing="1">
+                @foreach (var tag in Image.ImageTags.Where(x => !string.IsNullOrEmpty(x.Keyword)))
+                {
+                    <MudChip Class="ma-0" Size="Size.Small">@tag.Keyword</MudChip>
+                }
+            </MudStack>
+        }
         @if (_showMore)
         {
             <div class="d-flex flex-column flex-wrap my-2 gap-x-1">

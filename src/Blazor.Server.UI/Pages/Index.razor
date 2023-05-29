@@ -53,9 +53,9 @@
             </MudItem>
             <MudItem md="8" sm="12">
                 <div class="d-flex flex-row align-content-end align-end">
-                    <MudEnumSelect Style="min-width:120px" TEnum="ImageListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
+                    <MudEnumSelect Style="min-width:120px" FullWidth="false" TEnum="ImageListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
                     </MudEnumSelect>
-                    <MudSelect T="int" Value="@pagesize" Label="@L["Rows per page"]" FullWidth="false" Style="width:50px" ValueChanged="PageSizeValueChanged">
+                    <MudSelect T="int" Value="@pagesize" Label="@L["Rows per page"]" FullWidth="false" Style="min-width:100px" ValueChanged="PageSizeValueChanged">
                         <MudSelectItem Value="10">10</MudSelectItem>
                         <MudSelectItem Value="25">25</MudSelectItem>
                         <MudSelectItem Value="50">50</MudSelectItem>
