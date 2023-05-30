@@ -146,22 +146,23 @@ def img_object_detection_to_json(file: bytes = File(...)):
     # Step 4: Select detect obj return info
     # here you can choose what data to send to the result
     # detect_res = predict[['name', 'confidence','xmax','xmin','ymax','ymin']]
-    objects = predict['name'].values
-    for index, row in predict.iterrows():
-        bbox = {
-            'xmin': row['xmin'],
-            'ymin': row['ymin'],
-            'xmax': row['xmax'],
-            'ymax': row['ymax'],
-        }
-        detect_object = {
+    detect_objects = [
+        {
             'name': row['name'],
             'confidence': row['confidence'],
-            'bbox': bbox
+            'bbox': {
+                'xmin': row['xmin'],
+                'ymin': row['ymin'],
+                'xmax': row['xmax'],
+                'ymax': row['ymax']
+            }
         }
-        result['detect_objects'].append(detect_object)
-    result['detect_objects_names'] = ', '.join(objects)
-    #result['detect_objects'] = json.loads(detect_res.to_json(orient='records'))
+        for index, row in predict.iterrows()
+    ]
+    detect_object_names = ', '.join(predict['name'].values)
+
+    result['detect_objects'] = detect_objects
+    result['detect_objects_names'] = detect_object_names
 
     # Step 5: Logs and return
     logger.info("results: {}", result)
