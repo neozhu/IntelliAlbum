@@ -271,7 +271,7 @@
                             "rotateCW",
                             "flipX",
                             "flipY",],
-                        right: ["slideshow", "fullscreen", "download", "close"],
+                        right: ["slideshow", "thumbs","fullscreen", "download", "close"],
                     },
                 },
             });
@@ -291,6 +291,7 @@
                 }];
 
             const fancybox = new Fancybox(images, {
+                Thumbs: false,
                 Images: {
                     initialSize: "fit",
                     Panzoom: {
