@@ -4,7 +4,7 @@
     <MudCardMedia Image="@(ImageUrl())" Height="getHeight()" />
     <MudCardContent>
         <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
-            <div class="mud-link-disabled" style="color:#00000089">@Image.MetaData.DateTaken</div>
+            <div class="mud-link-disabled" style="color:#9E9E9E">@Image.MetaData.DateTaken</div>
         </MudStack>
         @if (Image.ImageTags is not null)
         {
@@ -15,7 +15,7 @@
                 }
             </MudStack>
         }
-        @if (_showMore)
+        @if (_showMore && Image.MetaData is not null)
         {
             <div class="d-flex flex-column flex-wrap my-2 gap-x-1">
                 <MudText Typo="Typo.body2">@L["Image Metadata"]</MudText>

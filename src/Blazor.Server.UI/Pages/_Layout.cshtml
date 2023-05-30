@@ -216,17 +216,17 @@
                         const color = '#FFFFFF';
                         const imageDiffVert = 25 + 2;
                         return `
-                                        <div style='width:${d.width}px;height:${d.height}px;padding-top:${imageDiffVert - 2}px;padding-left:1px;padding-right:1px'>
-                                                <div style="font-family: 'Inter', sans-serif;background-color:${color};  margin-left:-1px;width:${d.width - 2}px;height:${d.height - imageDiffVert}px;border-radius:10px;border: 1px solid #E4E2E9">
-                                                            <div style="display:flex;justify-content:flex-end;margin-top:5px;margin-right:8px">#${d.data.id.slice(-3)}</div>
-                                                    <div style="background-color:${color};margin-top:${-imageDiffVert - 20}px;margin-left:${15}px;border-radius:100px;width:50px;height:50px;" ></div>
-                                                    <div style="margin-top:${-imageDiffVert - 20}px;">   <img src=" ${d.data.profileUrl}" style="margin-left:${20}px;border-radius:100px;width:40px;height:40px;" /></div>
-                                                    <div style="font-size:15px;color:#08011E;margin-left:20px;margin-top:10px">  ${d.data.name} </div>
-                                                            <div style="color:#716E7B;margin-left:20px;margin-top:3px;font-size:10px;"> ${d.data.positionName} </div>
+                                                <div style='width:${d.width}px;height:${d.height}px;padding-top:${imageDiffVert - 2}px;padding-left:1px;padding-right:1px'>
+                                                        <div style="font-family: 'Inter', sans-serif;background-color:${color};  margin-left:-1px;width:${d.width - 2}px;height:${d.height - imageDiffVert}px;border-radius:10px;border: 1px solid #E4E2E9">
+                                                                    <div style="display:flex;justify-content:flex-end;margin-top:5px;margin-right:8px">#${d.data.id.slice(-3)}</div>
+                                                            <div style="background-color:${color};margin-top:${-imageDiffVert - 20}px;margin-left:${15}px;border-radius:100px;width:50px;height:50px;" ></div>
+                                                            <div style="margin-top:${-imageDiffVert - 20}px;">   <img src=" ${d.data.profileUrl}" style="margin-left:${20}px;border-radius:100px;width:40px;height:40px;" /></div>
+                                                            <div style="font-size:15px;color:#08011E;margin-left:20px;margin-top:10px">  ${d.data.name} </div>
+                                                                    <div style="color:#716E7B;margin-left:20px;margin-top:3px;font-size:10px;"> ${d.data.positionName} </div>
 
-                                                </div>
-                                            </div>
-                                                    `;
+                                                        </div>
+                                                    </div>
+                                                            `;
                     })
                     .container('.chart-container')
                     .data(orgdata)
@@ -238,10 +238,49 @@
                 }
             }, 50);
         }
+        function gallery(index, array_src, array_thumbsrc) {
+            let images = [];
+            for (let i = 0; i < array_src.length; i++) {
+                images.push({
+                    src: array_src[i],
+                    thumb: array_thumbsrc[i],
+                    download: array_src[i],
+                    caption: array_src[i].split("/").pop(),
+                    type: "image",
+                    initialSize: "fit",
+                })
+            }
+            const fancybox = new Fancybox(images, {
+                startIndex: index,
+                Thumbs: {
+                    type: "modern",
+                },
+                Images: {
+                    initialSize: "fit",
+                    Panzoom: {
+                        maxScale: 3,
+                    },
+                },
+                Toolbar: {
+                    display: {
+                        left: ["infobar"],
+                        middle: ["zoomIn",
+                            "zoomOut",
+                            "toggle1to1",
+                            "rotateCCW",
+                            "rotateCW",
+                            "flipX",
+                            "flipY",],
+                        right: ["slideshow", "fullscreen", "download", "close"],
+                    },
+                },
+            });
+            fancybox.jumpTo(index);
+        }
         function previewRawImage(url) {
             if (url == null) return;
             console.log(url);
-            var images = 
+            let images =
                 [{
                     src: url,
                     download: url,
@@ -250,7 +289,7 @@
                     initialSize: "fit",
 
                 }];
-         
+
             const fancybox = new Fancybox(images, {
                 Images: {
                     initialSize: "fit",

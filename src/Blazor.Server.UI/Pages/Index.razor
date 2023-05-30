@@ -3,6 +3,7 @@
 @using CleanArchitecture.Blazor.Application.Features.Images.Queries.Pagination;
 @using MudBlazor.Utilities
 @using Blazor.Server.UI.Models
+@inject IJSRuntime JS
 @inject IStringLocalizer<SharedResource> L
 <PageTitle>@Title</PageTitle>
 <style>
@@ -68,17 +69,17 @@
         </MudGrid>
         @if (searching)
         {
-            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-2"  />
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-2" />
         }
         else
         {
             if (images.Any())
             {
                 <MudGrid>
-                    @foreach(var img in images)
+                    @foreach (var img in images)
                     {
                         <MudItem xs="@xs">
-                            <ImageCard  Image="@img" ThumbSize="@thumbSize" OnPreview="OnPreview"></ImageCard>
+                            <ImageCard Image="@img" ThumbSize="@thumbSize" OnPreview="OnPreview"></ImageCard>
                         </MudItem>
                     }
                 </MudGrid>
@@ -89,7 +90,7 @@
             }
 
         }
-        
+
     </LandingSection>
 </MudContainer>
 
@@ -106,7 +107,7 @@
     private IMediator Mediator { get; set; } = default!;
     private ImagesWithPaginationQuery Query { get; set; } = new();
     private List<ImageDto> images { get; set; } = new();
-    private bool searching=false;
+    private bool searching = false;
     protected override async Task OnInitializedAsync()
     {
         await searchImage();
@@ -122,7 +123,8 @@
             var result = await Mediator.Send(Query);
             images = result.Items.ToList();
             totalitems = result.TotalItems;
-        }finally
+        }
+        finally
         {
             searching = false;
         }
@@ -133,7 +135,7 @@
         var index = images.FindIndex(x => x.Id == imageId);
         var src = images.Select(x => $"/rawimage/{x.Id}").ToArray();
         var thumbsrc = images.Select(x => $"/thumb/{thumbSize}/{x.Id}").ToArray();
-
+        await JS.InvokeVoidAsync("gallery", index, src, thumbsrc);
     }
     private async Task OnChangedListView(ImageListView view)
     {
@@ -142,12 +144,12 @@
     }
     private async Task PageChanged(int i)
     {
-        currentPage=i;
+        currentPage = i;
         await searchImage();
     }
     private async Task PageSizeValueChanged(int size)
     {
-        pagesize=size;
+        pagesize = size;
         await searchImage();
     }
     private async Task OnSmall()
