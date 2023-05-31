@@ -163,6 +163,7 @@ public class MetaDataService
                 if (filetypeDirectory != null)
                 {
                     imgMetaData.MimeType = filetypeDirectory.SafeExifGetString(FileTypeDirectory.TagDetectedFileMimeType);
+                    var filetype= filetypeDirectory.SafeExifGetString(FileTypeDirectory.TagDetectedFileTypeName);
                 }
                 var filemetaDirectory = metadata.OfType<FileMetadataDirectory>().FirstOrDefault();
                 if (filemetaDirectory != null)
