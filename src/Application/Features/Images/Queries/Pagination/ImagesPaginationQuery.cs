@@ -86,18 +86,21 @@ public class SearchImagesWithListView : FilteringOptionsBaseAttribute
         var listview = (ImageListView)value;
         return listview switch {
             ImageListView.All => expressionBody,
-            ImageListView.CreatedToday => Expression.GreaterThanOrEqual(Expression.Property(expressionBody, "Created"), 
+            ImageListView.DetectObjectError => Expression.Equal(Expression.Property(expressionBody, "DetectObjectStatus"), Expression.Constant(3, typeof(int))),
+            ImageListView.DetectFaceError => Expression.Equal(Expression.Property(expressionBody, "DetectFaceStatus"), Expression.Constant(3, typeof(int))),
+            ImageListView.RecognizeFaceError => Expression.Equal(Expression.Property(expressionBody, "RecognizeFaceStatus"), Expression.Constant(3, typeof(int))),
+            ImageListView.CreatedToday => Expression.GreaterThanOrEqual(Expression.Property(expressionBody, "Created"),
                                                                           Expression.Constant(start, typeof(DateTime?)))
-                                            .Combine(Expression.LessThanOrEqual(Expression.Property(expressionBody, "Created"), 
-                                                     Expression.Constant(end, typeof(DateTime?))), 
+                                            .Combine(Expression.LessThanOrEqual(Expression.Property(expressionBody, "Created"),
+                                                     Expression.Constant(end, typeof(DateTime?))),
                                                      CombineType.And),
-            ImageListView.Created30Days => Expression.GreaterThanOrEqual(Expression.Property(expressionBody, "Created"), 
+            ImageListView.Created30Days => Expression.GreaterThanOrEqual(Expression.Property(expressionBody, "Created"),
                                                                           Expression.Constant(start, typeof(DateTime?)))
-                                            .Combine(Expression.LessThanOrEqual(Expression.Property(expressionBody, "Created"), 
-                                                     Expression.Constant(end30, typeof(DateTime?))), 
+                                            .Combine(Expression.LessThanOrEqual(Expression.Property(expressionBody, "Created"),
+                                                     Expression.Constant(end30, typeof(DateTime?))),
                                                      CombineType.And),
-            _=> expressionBody
-        };
+            _ => expressionBody
+        }; ;
     }
 }
 public enum ImageListView
@@ -106,6 +109,12 @@ public enum ImageListView
     All,
     [Description("Created Toady")]
     CreatedToday,
+    [Description("Detect Object Error")]
+    DetectObjectError,
+    [Description("Detect Face Error")]
+    DetectFaceError,
+    [Description("Recognize Face Error")]
+    RecognizeFaceError,
     [Description("Created within the last 30 days")]
     Created30Days
 }
