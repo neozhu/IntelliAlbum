@@ -42,7 +42,7 @@
             <ToolBarContent>
                 <div class="d-flex align-start flex-grow-1">
                     <div class="d-flex gap-4">
-                        <MudIcon Icon="@Icons.Material.Filled.Window" Size="Size.Large" />
+                        <MudIcon Icon="@Icons.Material.Filled.PhotoLibrary" Size="Size.Large" />
                         <div class="d-flex flex-column">
                             <MudText Typo="Typo.caption">@Title</MudText>
                             <MudEnumSelect Style="min-width:120px" TEnum="ImageListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
@@ -454,6 +454,7 @@
             var result = await Mediator.Send(new RescanImageCommand(id,0));
             Snackbar.Add($"Commit {result.Data} success, please waiting for complete.", MudBlazor.Severity.Info);
             await _table.ReloadServerData();
+            _selectedItems = new HashSet<ImageDto>();
         }
     }
     private async Task OnEdit(ImageDto dto)

@@ -13,34 +13,9 @@ public class MenuService : IMenuService
             SectionItems = new List<MenuSectionItemModel>
             {
                 new() { Title = "Home", Icon = Icons.Material.Filled.Home, Href = "/" },
-                new()
-                {
-                    Title = "Album",
-                    Icon = Icons.Material.Filled.PhotoAlbum,
-                    PageStatus = PageStatus.Completed,
-                    IsParent = true,
-                    MenuItems = new List<MenuSectionSubItemModel>
-                    {
-                        new()
-                        {
-                            Title = "Images",
-                            Href = "/pages/Images",
-                            PageStatus = PageStatus.Completed
-                        },
-                        new()
-                        {
-                            Title = "Samples",
-                            Href = "/pages/Samples",
-                            PageStatus = PageStatus.Completed
-                        },
-                        new()
-                        {
-                            Title = "Documents",
-                            Href = "/pages/documents",
-                            PageStatus = PageStatus.Completed
-                        }
-                    }
-                },
+                new() { Title = "Images", Icon = Icons.Material.Filled.PhotoLibrary, Href = "/pages/Images" },
+                new() { Title = "Samples", Icon = Icons.Material.Filled.SwitchAccount, Href = "/pages/Samples" },
+                 
                  
             }
         },

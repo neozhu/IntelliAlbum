@@ -128,9 +128,10 @@
                     {
                         var filestream = uploaded.File.OpenReadStream(GlobalVariable.MaxAllowedSize);
                         var savefile = Path.Combine(_settings.SourceDirectory, uploaded.FileName);
-                        var imgStream = File.Create(savefile,512, FileOptions.Asynchronous);
+                        var imgStream = File.Create(savefile);
                         await filestream.CopyToAsync(imgStream);
                         filestream.Close();
+                        imgStream.Close();
                     }
                     catch (Exception e)
                     {
