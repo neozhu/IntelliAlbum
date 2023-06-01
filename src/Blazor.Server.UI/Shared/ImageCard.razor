@@ -3,9 +3,13 @@
 <MudCard Class="@className" Elevation="2">
     <MudCardMedia Image="@(ImageUrl())" Height="getHeight()" />
     <MudCardContent>
-        <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
-            <div class="mud-text-disabled">@Image.MetaData.DateTaken</div>
+        @if (Image.MetaData is not null)
+        {
+            <MudStack AlignItems="AlignItems.Start" Spacing="0" Class="mb-2">
+                <div class="mud-text-disabled" style="font-size:12px">@Image.MetaData.DateTaken</div>
+                <div class="mud-text-disabled" style="font-size:12px">@Image.MetaData.ToImageInformation()</div>
         </MudStack>
+        }
         @if (Image.ImageTags is not null)
         {
             <MudStack Row="true" Class="flex-wrap" Spacing="1">
@@ -15,6 +19,8 @@
                 }
             </MudStack>
         }
+       
+       
         @if (_showMore && Image.MetaData is not null)
         {
             <div class="d-flex flex-column flex-wrap my-2 gap-x-1">

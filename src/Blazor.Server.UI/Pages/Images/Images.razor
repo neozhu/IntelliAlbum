@@ -3,6 +3,7 @@
 @using BlazorDownloadFile
 @using CleanArchitecture.Blazor.Application.BackendServices;
 @using CleanArchitecture.Blazor.Application.Features.Images.Caching
+@using CleanArchitecture.Blazor.Application.Features.Images.Commands.Rescan;
 @using CleanArchitecture.Blazor.Application.Features.Images.DTOs
 @using CleanArchitecture.Blazor.Application.Features.Images.Commands.Delete
 
@@ -58,7 +59,16 @@
                                         OnClick="@(()=>OnRefresh())"
                                         StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Primary"
                                         Style="margin-right: 4px; margin-bottom:4px">@ConstantString.Refresh</MudButton>
-
+                            @if (_canRescan)
+                            {
+                                <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Scanner"
+                                       Disabled="@(!(_selectedItems.Count>0))"
+                                       Size="Size.Small"
+                                       Style="margin-right: 4px; margin-bottom:4px"
+                                       OnClick="OnRescan"
+                                       IconColor="Color.Primary">@L["Rescan"]</MudButton>
+                            }
                              @if (_canDelete)
                             {
                                 <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Error"
@@ -129,7 +139,20 @@
                     </CellTemplate>
                 </PropertyColumn>
 
-                <PropertyColumn Property="x => x.FileSizeBytes" Title="@L[_currentDto.GetMemberDescription(x=>x.FileSizeBytes)]" />
+                <PropertyColumn Property="x => x.FileSizeBytes" Title="@L[_currentDto.GetMemberDescription(x=>x.FileSizeBytes)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-column">
+                        @if(context.Item.MetaData is not null)
+                        {
+                                <MudText Typo="Typo.body2">@context.Item.MetaData.ToImageInformation()</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2">@context.Item.FileSizeBytes</MudText>
+                            }
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
                 <PropertyColumn Property="x => x.FileCreationDate" Title="@L[_currentDto.GetMemberDescription(x=>x.FileCreationDate)]" />
                 <PropertyColumn Property="x => x.FileLastModDate" Title="@L[_currentDto.GetMemberDescription(x=>x.FileLastModDate)]" />
                 <PropertyColumn Property="x => x.RecentlyViewDatetime" Title="@L[_currentDto.GetMemberDescription(x=>x.RecentlyViewDatetime)]" />
@@ -325,7 +348,7 @@
     private bool _canDelete;
     private bool _canImport;
     private bool _canExport;
-
+    private bool _canRescan;
     private  HubConnection _hubConnection;
     protected override async Task OnInitializedAsync()
     {
@@ -337,6 +360,7 @@
         _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Delete)).Succeeded;
         _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Import)).Succeeded;
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.Export)).Succeeded;
+        _canRescan = (await AuthService.AuthorizeAsync(state.User, Permissions.Images.ReScan)).Succeeded;
         var hubUrl = NavigationManager.ToAbsoluteUri(NotificationHub.NotificationRoot);
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
@@ -361,22 +385,16 @@
     }
     private async Task HandleReceiveNotification(string type, string json)
     {
-        Console.WriteLine(type, json);
         InvokeAsync(() => {
             Snackbar.Add($"{type} - {json}", MudBlazor.Severity.Info);
         });
-
-        if (type == "WorkStatusChanged" && json.Contains("idle"))
-        {
-            await _table.ReloadServerData();
-        }
     }
     private async Task OnPreview(ImageDto dto)
     {
 
         var url = $"/rawimage/{dto.Id}";
         await JS.InvokeVoidAsync("previewRawImage", url);
-      
+
 
     }
     private async Task<GridData<ImageDto>> ServerReload(GridState<ImageDto> state)
@@ -421,7 +439,23 @@
     }
 
 
-
+    private async Task OnRescan()
+    {
+        var parameters = new DialogParameters
+           {
+             { nameof(ConfirmationDialog.ContentText),string.Format(L["Are you sure you want to rescan images"]) }
+           };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<ConfirmationDialog>(L["Confrim"], parameters, options);
+        var state = await dialog.Result;
+        if (!state.Canceled)
+        {
+            var id = _selectedItems.Select(x => x.Id).ToArray();
+            var result = await Mediator.Send(new RescanImageCommand(id,0));
+            Snackbar.Add($"Commit {result.Data} success, please waiting for complete.", MudBlazor.Severity.Info);
+            await _table.ReloadServerData();
+        }
+    }
     private async Task OnEdit(ImageDto dto)
     {
         var command = Mapper.Map<UpdateImageCommand>(dto);

@@ -164,10 +164,13 @@ public class MetaDataService
                 {
                     imgMetaData.MimeType = filetypeDirectory.SafeExifGetString(FileTypeDirectory.TagDetectedFileMimeType);
                     var filetype= filetypeDirectory.SafeExifGetString(FileTypeDirectory.TagDetectedFileTypeName);
+                    imgMetaData.FileType = filetype;
                 }
                 var filemetaDirectory = metadata.OfType<FileMetadataDirectory>().FirstOrDefault();
                 if (filemetaDirectory != null)
                 {
+                    var filesize = filemetaDirectory.SafeGetExifInt(FileMetadataDirectory.TagFileSize);
+                    imgMetaData.FileSize = filesize;
                     imgMetaData.LastUpdated = filemetaDirectory.SafeGetExifDateTime(FileMetadataDirectory.TagFileModifiedDate);
                 }
                 var subIfdDirectory = metadata.OfType<ExifSubIfdDirectory>().FirstOrDefault();
@@ -227,6 +230,7 @@ public class MetaDataService
 
                 if (jpegDirectory != null)
                 {
+                    
                     if (imgMetaData.Width == 0)
                         imgMetaData.Width = jpegDirectory.SafeGetExifInt(JpegDirectory.TagImageWidth);
                     if (imgMetaData.Height == 0)

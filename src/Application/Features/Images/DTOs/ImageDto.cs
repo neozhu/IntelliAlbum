@@ -23,7 +23,7 @@ public class ImageDto : IMapFrom<Image>
     public string Name { get; set; } = String.Empty;
     [Description("Comments")]
     public string? Comments { get; set; }
-    [Description("File Size Bytes")]
+    [Description("File Size")]
     public int FileSizeBytes { get; set; }
     [Description("File Creation Date")]
     public DateTime FileCreationDate { get; set; }

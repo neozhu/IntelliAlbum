@@ -31,7 +31,7 @@
             <MudItem xs="12" sm="12">
                 <MudPaper Elevation="3">
                     <div class="d-flex flex-row align-content-center align-center">
-                        <MudTextField T="string" Value="@keyword" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"></MudTextField>
+                        <MudTextField T="string" Value="@keyword" ValueChanged="KeywordValueChanged" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"></MudTextField>
                         <MudButtonGroup>
                             <MudTooltip Text="@L["Small"]">
                                 <MudIconButton Icon="@Icons.Material.Filled.ViewCompact" OnClick="OnSmall" aria-label="small"></MudIconButton>
@@ -95,7 +95,7 @@
 @code {
     public string Title { get; set; } = "Dashboard";
     private int xs = 2;
-    private int pagesize = 10;
+    private int pagesize = 50;
     private int currentPage = 1;
     private int totalitems = 52;
     private ThumbSize thumbSize { get; set; } = ThumbSize.Small;
@@ -127,6 +127,11 @@
             searching = false;
         }
 
+    }
+    private async Task KeywordValueChanged(string keyword)
+    {
+        this.keyword = keyword;
+        await searchImage();
     }
     public async void OnPreview(int imageId)
     {

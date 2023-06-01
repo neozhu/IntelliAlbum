@@ -30,7 +30,6 @@ public class ImageConfiguration : IEntityTypeConfiguration<Image>
         builder.Property(t => t.Name).HasMaxLength(250).IsRequired();
 
         builder.HasOne(x => x.Folder).WithMany(x => x.Images).HasForeignKey(x => x.FolderId).IsRequired();
-
         builder.Ignore(e => e.DomainEvents);
         builder.Ignore(e => e.DownloadImageUrl);
         builder.Ignore(e => e.RawImageUrl);
