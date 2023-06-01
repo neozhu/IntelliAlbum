@@ -138,10 +138,9 @@ def img_object_detection_to_json(file: bytes = File(...)):
     result={'detect_objects': []}
 
     # Step 2: Convert the image file to an image object
-    input_image = get_image_from_bytes(file)
-
-    # Step 3: Predict from model
-    predict = detect_sample_model(input_image)
+    with  get_image_from_bytes(file) as input_image:
+        # Step 3: Predict from model
+        predict = detect_sample_model(input_image)
 
     # Step 4: Select detect obj return info
     # here you can choose what data to send to the result
