@@ -11,7 +11,6 @@ using MetadataExtractor.Formats.Xmp;
 using Directory = MetadataExtractor.Directory;
 using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
 using ImageProcessingException = MetadataExtractor.ImageProcessingException;
-using Tag = CleanArchitecture.Blazor.Domain.Entities.Tag;
 using MetadataExtractor.Formats.FileType;
 using MetadataExtractor.Formats.FileSystem;
 

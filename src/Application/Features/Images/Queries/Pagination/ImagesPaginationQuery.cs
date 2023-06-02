@@ -4,6 +4,7 @@
 using CleanArchitecture.Blazor.Application.Features.Images.DTOs;
 using CleanArchitecture.Blazor.Application.Features.Images.Caching;
 using Image = CleanArchitecture.Blazor.Domain.Entities.Image;
+using CleanArchitecture.Blazor.Application.Common.Models;
 
 namespace CleanArchitecture.Blazor.Application.Features.Images.Queries.Pagination;
 
@@ -34,8 +35,37 @@ public class ImagesWithPaginationQuery : PaginationFilterBase, ICacheableRequest
     [IgnoreFilter]
     public MemoryCacheEntryOptions? Options => ImageCacheKey.MemoryCacheEntryOptions;
 }
-    
+
+public class SearchImagesWithPaginationQuery : PaginationFilterBase, ICacheableRequest<PaginatedData<Image>>
+{
+    [CompareTo("Name", "Comments", "Keywords")] // <-- This filter will be applied to Name or Description.
+    [StringFilterOptions(StringFilterOption.Contains)]
+    public string? Keyword { get; set; }
+    [Description("Search for creation date")]
+    [CompareTo("FileCreationDate")]
+    public Range<DateTime>? FileCreationDate { get; set; }
+    [Description("Search for recently view date")]
+    [CompareTo("RecentlyViewDatetime")]
+    public Range<DateTime>? RecentlyViewDatetime { get; set; }
+    [Description("Search for folder")]
+    [CompareTo("FolderId")]
+    public int? FolderId { get; set; }
+
+    [CompareTo(typeof(SearchImagesWithListView), "Id")]
+    public ImageListView ListView { get; set; } = ImageListView.All; //<-- When the user selects a different ListView,
+                                                                     // a custom query expression is executed on the filter.
+    public override string ToString()
+    {
+        return $"Listview:{ListView},Search:{Keyword},Sort:{Sort},SortBy:{SortBy},{Page},{PerPage},{FolderId},{FileCreationDate?.ToString()},{RecentlyViewDatetime?.ToString()}";
+    }
+    [IgnoreFilter]
+    public string CacheKey => ImageCacheKey.GetPaginationCacheKey($"{this}");
+    [IgnoreFilter]
+    public MemoryCacheEntryOptions? Options => ImageCacheKey.MemoryCacheEntryOptions;
+}
+
 public class ImagesWithPaginationQueryHandler :
+         IRequestHandler<SearchImagesWithPaginationQuery, PaginatedData<Image>>,
          IRequestHandler<ImagesWithPaginationQuery, PaginatedData<ImageDto>>
 {
         private readonly IApplicationDbContext _context;
@@ -56,11 +86,23 @@ public class ImagesWithPaginationQueryHandler :
         public async Task<PaginatedData<ImageDto>> Handle(ImagesWithPaginationQuery request, CancellationToken cancellationToken)
         {
            // TODO: Implement ImagesWithPaginationQueryHandler method 
-           var data = await _context.Images.ApplyFilterWithoutPagination(request)
-                .ProjectTo<ImageDto>(_mapper.ConfigurationProvider)
+           //var data = await _context.Images.ApplyFilterWithoutPagination(request)
+           //     .ProjectTo<ImageDto>(_mapper.ConfigurationProvider)
+           //     .PaginatedDataAsync(request.Page, request.PerPage);
+        var data = await _context.Images.ApplyFilterWithoutPagination(request)
                 .PaginatedDataAsync(request.Page, request.PerPage);
-            return data;
+        var des = _mapper.Map<IEnumerable<Image>, List<ImageDto>>(data.Items).ToArray();
+        var result = new PaginatedData<ImageDto>(des, data.TotalItems, data.CurrentPage, request.PerPage);
+  
+        return result;
         }
+    public async Task<PaginatedData<Image>> Handle(SearchImagesWithPaginationQuery request, CancellationToken cancellationToken)
+    {
+        // TODO: Implement ImagesWithPaginationQueryHandler method 
+        var data = await _context.Images.ApplyFilterWithoutPagination(request)
+             .PaginatedDataAsync(request.Page, request.PerPage);
+        return data;
+    }
 }
 
 public class ImagesPaginationSpecification : Specification<Image>

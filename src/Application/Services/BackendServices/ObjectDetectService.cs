@@ -328,7 +328,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                     imageObjects.Add(new ImageObject()
                                     {
                                         Type= ObjectTypes.Person,
-                                        Tag= obj.Name ,
+                                        TagKeyword= obj.Name ,
                                         Score = obj.Confidence,
                                         RectX = Convert.ToInt32(obj.BBox.Xmin),
                                         RectY = Convert.ToInt32(obj.BBox.Ymin),
@@ -341,7 +341,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                     imageObjects.Add(new ImageObject()
                                     {
                                         Type = ObjectTypes.Object,
-                                        Tag = obj.Name ,
+                                        TagKeyword = obj.Name ,
                                         Score = obj.Confidence,
                                         RectX = Convert.ToInt32(obj.BBox.Xmin),
                                         RectY = Convert.ToInt32(obj.BBox.Ymin),
@@ -367,7 +367,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                             image.DetectObjectStatus = 3;
                         }
                         image.ImageObjects = imageObjects;
-                        image.Keywords = $"{image.MetaData} {string.Join(' ', imageObjects.Select(x=>x.Tag))}";
+                        image.Keywords = $"{image.MetaData} {string.Join(' ', imageObjects.Select(x=>x.TagKeyword))}";
                     }
                     catch (Exception ex)
                     {

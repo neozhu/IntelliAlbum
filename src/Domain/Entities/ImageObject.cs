@@ -11,7 +11,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
         public ObjectTypes Type { get; set; } = ObjectTypes.Object;
-        public string? Tag { get; set; } 
+        public string? TagKeyword { get; set; } 
         public double Score { get; set; }
         public int RectX { get; set; }
         public int RectY { get; set; }
@@ -20,7 +20,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
 
         public override string ToString()
         {
-            return $"{Tag} {Type} {Name} {Description}";
+            return $"{TagKeyword} {Type} {Name} {Description}";
         }
     }
 }

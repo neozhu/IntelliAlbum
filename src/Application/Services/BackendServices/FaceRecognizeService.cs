@@ -339,7 +339,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
                             image.ImageTags.Add(newtag);
                         }
                     }
-                    image.Keywords = $" {image.MetaData} {string.Join(' ', image.ImageObjects.Select(x=>x.Tag))} {string.Join(' ', nametag)}";
+                    image.Keywords = $" {image.MetaData} {string.Join(' ', image.ImageObjects.Select(x=>x.TagKeyword))} {string.Join(' ', nametag)}";
                     image.RecognizeFaceStatus = 2;
                 }
             }

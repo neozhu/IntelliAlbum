@@ -103,7 +103,7 @@
     private ImageListView listview { get; set; } = ImageListView.All;
     [Inject]
     private IMediator Mediator { get; set; } = default!;
-    private ImagesWithPaginationQuery Query { get; set; } = new();
+    private SearchImagesWithPaginationQuery Query { get; set; } = new();
     private List<ImageDto> images { get; set; } = new();
     private bool searching = false;
     protected override async Task OnInitializedAsync()
@@ -117,9 +117,9 @@
         try
         {
             searching = true;
-            Query = new ImagesWithPaginationQuery() { Sort = "Id", SortBy =  AutoFilterer.Enums.Sorting.Descending, Keyword = keyword, Page = currentPage, PerPage = pagesize, ListView = listview };
+            Query = new SearchImagesWithPaginationQuery() { Sort = "Id", SortBy = AutoFilterer.Enums.Sorting.Descending, Keyword = keyword, Page = currentPage, PerPage = pagesize, ListView = listview };
             var result = await Mediator.Send(Query);
-            images = result.Items.ToList();
+            //images = result.Items.ToList();
             totalitems = result.TotalItems;
         }
         finally

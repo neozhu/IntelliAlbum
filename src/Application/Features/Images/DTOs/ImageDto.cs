@@ -41,7 +41,7 @@ public class ImageDto : IMapFrom<Image>
     public DateTime? FaceRecognizeLastUpdated { get; set; }
 
     [Description("Metadata")]
-    public virtual ImageMetaData MetaData { get; set; } = new();
+    public virtual ImageMetaData? MetaData { get; set; } = new();
     [Description("Hash")]
     public virtual Hash Hash { get; set; } = new();
     [Description("Tags")]
@@ -59,7 +59,7 @@ public class ImageDto : IMapFrom<Image>
         return $"{Name} [{Id}]";
     }
     [Description("Face Detections")]
-    public virtual List<FaceDetection>? FaceDetections { get; set; }
+    public virtual List<FaceDetection>? FaceDetections { get; set; } = new();
     [Description("Process Thumb Status")]
     public int ProcessThumbStatus { get; set; }
     [Description("Detect Object Status")]
@@ -69,4 +69,15 @@ public class ImageDto : IMapFrom<Image>
     [Description("Recognize Face Status")]
     public int RecognizeFaceStatus { get; set; }
 }
+
+public class TagDto:IMapFrom<Tag>
+{
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<Tag, TagDto>().ReverseMap();
+    }
+    public string Keyword { get; set; } = null!;
+}
+
+
 
