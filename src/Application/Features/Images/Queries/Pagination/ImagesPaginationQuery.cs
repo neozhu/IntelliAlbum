@@ -25,7 +25,7 @@ public class ImagesWithPaginationQuery : PaginationFilterBase, ICacheableRequest
 
     [CompareTo(typeof(SearchImagesWithListView), "Id")]
     public ImageListView ListView { get; set; } = ImageListView.All; //<-- When the user selects a different ListView,
-                                                                               // a custom query expression is executed on the filter.
+                                                                     // a custom query expression is executed on the filter.
     public override string ToString()
     {
         return $"Listview:{ListView},Search:{Keyword},Sort:{Sort},SortBy:{SortBy},{Page},{PerPage},{FolderId},{FileCreationDate?.ToString()},{RecentlyViewDatetime?.ToString()}";
@@ -68,34 +68,33 @@ public class ImagesWithPaginationQueryHandler :
          IRequestHandler<SearchImagesWithPaginationQuery, PaginatedData<Image>>,
          IRequestHandler<ImagesWithPaginationQuery, PaginatedData<ImageDto>>
 {
-        private readonly IApplicationDbContext _context;
-        private readonly IMapper _mapper;
-        private readonly IStringLocalizer<ImagesWithPaginationQueryHandler> _localizer;
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+    private readonly IStringLocalizer<ImagesWithPaginationQueryHandler> _localizer;
 
-        public ImagesWithPaginationQueryHandler(
-            IApplicationDbContext context,
-            IMapper mapper,
-            IStringLocalizer<ImagesWithPaginationQueryHandler> localizer
-            )
-        {
-            _context = context;
-            _mapper = mapper;
-            _localizer = localizer;
-        }
+    public ImagesWithPaginationQueryHandler(
+        IApplicationDbContext context,
+        IMapper mapper,
+        IStringLocalizer<ImagesWithPaginationQueryHandler> localizer
+        )
+    {
+        _context = context;
+        _mapper = mapper;
+        _localizer = localizer;
+    }
 
-        public async Task<PaginatedData<ImageDto>> Handle(ImagesWithPaginationQuery request, CancellationToken cancellationToken)
-        {
-           // TODO: Implement ImagesWithPaginationQueryHandler method 
-           //var data = await _context.Images.ApplyFilterWithoutPagination(request)
-           //     .ProjectTo<ImageDto>(_mapper.ConfigurationProvider)
-           //     .PaginatedDataAsync(request.Page, request.PerPage);
+    public async Task<PaginatedData<ImageDto>> Handle(ImagesWithPaginationQuery request, CancellationToken cancellationToken)
+    {
+        // TODO: Implement ImagesWithPaginationQueryHandler method 
+        //var data = await _context.Images.ApplyFilterWithoutPagination(request)
+        //     .ProjectTo<ImageDto>(_mapper.ConfigurationProvider)
+        //     .PaginatedDataAsync(request.Page, request.PerPage);
         var data = await _context.Images.ApplyFilterWithoutPagination(request)
                 .PaginatedDataAsync(request.Page, request.PerPage);
         var des = _mapper.Map<IEnumerable<Image>, List<ImageDto>>(data.Items).ToArray();
         var result = new PaginatedData<ImageDto>(des, data.TotalItems, data.CurrentPage, request.PerPage);
-  
         return result;
-        }
+    }
     public async Task<PaginatedData<Image>> Handle(SearchImagesWithPaginationQuery request, CancellationToken cancellationToken)
     {
         // TODO: Implement ImagesWithPaginationQueryHandler method 
@@ -114,7 +113,7 @@ public class ImagesPaginationSpecification : Specification<Image>
         {
             And(x => x.Name.Contains(query.Keyword));
         }
-       
+
     }
 }
 public class SearchImagesWithListView : FilteringOptionsBaseAttribute
@@ -122,11 +121,12 @@ public class SearchImagesWithListView : FilteringOptionsBaseAttribute
     public override Expression BuildExpression(Expression expressionBody, PropertyInfo targetProperty, PropertyInfo filterProperty, object value)
     {
         var today = DateTime.Now.Date;
-        var start = Convert.ToDateTime(today.ToString("yyyy-MM-dd",CultureInfo.CurrentCulture) + " 00:00:00", CultureInfo.CurrentCulture);
-        var end = Convert.ToDateTime(today.ToString("yyyy-MM-dd",CultureInfo.CurrentCulture) + " 23:59:59", CultureInfo.CurrentCulture);
+        var start = Convert.ToDateTime(today.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture) + " 00:00:00", CultureInfo.CurrentCulture);
+        var end = Convert.ToDateTime(today.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture) + " 23:59:59", CultureInfo.CurrentCulture);
         var end30 = Convert.ToDateTime(today.AddDays(30).ToString("yyyy-MM-dd", CultureInfo.CurrentCulture) + " 23:59:59", CultureInfo.CurrentCulture);
         var listview = (ImageListView)value;
-        return listview switch {
+        return listview switch
+        {
             ImageListView.All => expressionBody,
             ImageListView.DetectObjectError => Expression.Equal(Expression.Property(expressionBody, "DetectObjectStatus"), Expression.Constant(3, typeof(int))),
             ImageListView.DetectFaceError => Expression.Equal(Expression.Property(expressionBody, "DetectFaceStatus"), Expression.Constant(3, typeof(int))),
