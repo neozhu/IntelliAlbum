@@ -348,16 +348,17 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                         RectHeight = Convert.ToInt32(obj.BBox.Ymax),
                                         RectWidth = Convert.ToInt32(obj.BBox.Xmax),
                                     });
+                                    if (!image.ImageTags.Any(x => x.Keyword.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
+                                    {
+                                        var newtag = _tags.FirstOrDefault(x => x.Keyword == obj.Name) ?? new Tag() { Keyword = obj.Name };
+                                        image.ImageTags.Add(newtag);
+                                    }
                                 }
                                 if(!image.Classification.Any(x=>x.Label.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
                                 {
                                     image.Classification.Add(new ImageClassification() { Label = obj.Name, Score = obj.Confidence });
                                 }
-                                if(!image.ImageTags.Any(x=>x.Keyword.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
-                                {
-                                    var newtag = _tags.FirstOrDefault(x => x.Keyword == obj.Name) ?? new Tag() { Keyword = obj.Name };
-                                    image.ImageTags.Add(new Tag() { Keyword = obj.Name });
-                                }
+                                
                             }
                             
                             
