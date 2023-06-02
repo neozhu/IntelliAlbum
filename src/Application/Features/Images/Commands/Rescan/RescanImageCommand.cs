@@ -39,15 +39,25 @@ namespace CleanArchitecture.Blazor.Application.Features.Images.Commands.Rescan;
         }
         public async Task<Result<int>> Handle(RescanImageCommand request, CancellationToken cancellationToken)
         {
-            
-            var result = await _context.Images.Where(x=>request.Id.Contains(x.Id))
-                                      .ExecuteUpdateAsync(x=>x.SetProperty(y=>y.DetectObjectStatus,y=>0)
-                                                              .SetProperty(y=>y.ObjectDetectLastUpdated,y=>null)
+        if (request.Step == 0)
+        {
+            var result = await _context.Images.Where(x => request.Id.Contains(x.Id))
+                                      .ExecuteUpdateAsync(x => x.SetProperty(y => y.DetectObjectStatus, y => 0)
+                                                              .SetProperty(y => y.ObjectDetectLastUpdated, y => null)
                                                               .SetProperty(y => y.DetectFaceStatus, y => 0)
                                                               .SetProperty(y => y.FaceDetectLastUpdated, y => null)
                                                               .SetProperty(y => y.RecognizeFaceStatus, y => 0)
                                                               .SetProperty(y => y.FaceRecognizeLastUpdated, y => null));
             return await Result<int>.SuccessAsync(result);
+        }
+        else
+        {
+            var result = await _context.Images.Where(x => request.Id.Contains(x.Id))
+                                      .ExecuteUpdateAsync(x =>x.SetProperty(y => y.RecognizeFaceStatus, y => 0)
+                                                              .SetProperty(y => y.FaceRecognizeLastUpdated, y => null));
+            return await Result<int>.SuccessAsync(result);
+        }
+            
         }
 
     }

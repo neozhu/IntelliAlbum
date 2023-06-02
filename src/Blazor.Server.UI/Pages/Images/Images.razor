@@ -68,6 +68,14 @@
                                        Style="margin-right: 4px; margin-bottom:4px"
                                        OnClick="OnRescan"
                                        IconColor="Color.Primary">@L["Rescan"]</MudButton>
+
+                                <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.PersonSearch"
+                                       Disabled="@(!(_selectedItems.Count>0))"
+                                       Size="Size.Small"
+                                       Style="margin-right: 4px; margin-bottom:4px"
+                                       OnClick="OnRecognize"
+                                       IconColor="Color.Primary">@L["Retry Recognize"]</MudButton>
                             }
                              @if (_canDelete)
                             {
@@ -452,6 +460,24 @@
         {
             var id = _selectedItems.Select(x => x.Id).ToArray();
             var result = await Mediator.Send(new RescanImageCommand(id,0));
+            Snackbar.Add($"Commit {result.Data} success, please waiting for complete.", MudBlazor.Severity.Info);
+            await _table.ReloadServerData();
+            _selectedItems = new HashSet<ImageDto>();
+        }
+    }
+    private async Task OnRecognize()
+    {
+        var parameters = new DialogParameters
+           {
+             { nameof(ConfirmationDialog.ContentText),string.Format(L["Are you sure you want to retry recognize"]) }
+           };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<ConfirmationDialog>(L["Confrim"], parameters, options);
+        var state = await dialog.Result;
+        if (!state.Canceled)
+        {
+            var id = _selectedItems.Select(x => x.Id).ToArray();
+            var result = await Mediator.Send(new RescanImageCommand(id, 1));
             Snackbar.Add($"Commit {result.Data} success, please waiting for complete.", MudBlazor.Severity.Info);
             await _table.ReloadServerData();
             _selectedItems = new HashSet<ImageDto>();

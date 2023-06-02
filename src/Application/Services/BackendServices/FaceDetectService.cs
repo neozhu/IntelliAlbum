@@ -41,18 +41,18 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
         _statusService = statusService;
         _workService = workService;
         Synology = false;
-        EnableObjectDetect = _serviceSettings.EnableObjectDetect;
+        EnableFaceDetection = _serviceSettings.EnableFaceDetection;
         _workService.AddJobSource(this);
     }
     public bool Synology { get; set; }
 
-    public bool EnableObjectDetect { get; set; } = true;
+    public bool EnableFaceDetection { get; set; } = true;
 
     public JobPriorities Priority => JobPriorities.FaceDetection;
 
     public async Task<ICollection<IProcessJob>> GetPendingJobs(int maxJobs)
     {
-        if (!EnableObjectDetect)
+        if (!EnableFaceDetection)
             return new FaceDectectProcess[0];
 
         using var scope = _scopeFactory.CreateScope();

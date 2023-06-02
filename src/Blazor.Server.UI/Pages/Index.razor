@@ -76,7 +76,7 @@
                 <MudGrid>
                     @foreach (var img in images)
                     {
-                        <MudItem xs="@xs">
+                        <MudItem lg="@xs" sm="@(getsm())" md="@(getmd())" xs="12">
                             <ImageCard Image="@img" ThumbSize="@thumbSize" OnPreview="OnPreview"></ImageCard>
                         </MudItem>
                     }
@@ -110,14 +110,33 @@
     {
         await searchImage();
     }
-
+    private int getsm()
+    {
+        return thumbSize switch
+        {
+            ThumbSize.Small => 6,
+            ThumbSize.Medium => 6,
+            ThumbSize.Large => 12,
+            _ => 12
+        };
+    }
+    private int getmd()
+    {
+        return thumbSize switch
+        {
+            ThumbSize.Small => 4,
+            ThumbSize.Medium => 4,
+            ThumbSize.Large => 6,
+            _ => 6
+        };
+    }
     private async Task searchImage()
     {
         if (searching) return;
         try
         {
             searching = true;
-            Query = new ImagesWithPaginationQuery() { Sort = "Id", SortBy =  AutoFilterer.Enums.Sorting.Descending, Keyword = keyword, Page = currentPage, PerPage = pagesize, ListView = listview };
+            Query = new ImagesWithPaginationQuery() { Sort = "Id", SortBy = AutoFilterer.Enums.Sorting.Descending, Keyword = keyword, Page = currentPage, PerPage = pagesize, ListView = listview };
             var result = await Mediator.Send(Query);
             images = result.Items.ToList();
             totalitems = result.TotalItems;
