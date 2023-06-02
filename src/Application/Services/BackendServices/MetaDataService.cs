@@ -148,7 +148,7 @@ public class MetaDataService
         var keywords = new string[0];
         List<ImageObject> faceobjects = new List<ImageObject>();
         var imgMetaData = new ImageMetaData();
-        imgMetaData.EXIFData = new List<DirectoryBase>();
+        //imgMetaData.EXIFData = new List<DirectoryBase>();
         try
         {
             var metadata = SafeReadImageMetadata(image.FullPath);
@@ -353,11 +353,8 @@ public class MetaDataService
             _logger.LogError(ex, "Error reading image metadata for {0}", image.FullPath);
             image.MetaData = null;
         }
-        if (keywords.Any())
-        {
-            image.ImageTags = keywords.Select(x => new Tag() { Keyword = x }).ToList();
-        }
 
+        imgMetaData.TagKeywords = string.Join(", ", keywords);
         image.MetaData = imgMetaData;
         image.Keywords = $"{imgMetaData}";  
         return imgMetaData;

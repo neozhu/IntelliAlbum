@@ -10,6 +10,8 @@ namespace CleanArchitecture.Blazor.Domain.Entities
     {
         public string Keyword { get; set; } = null!;
 
+        public virtual ICollection<Image>? Images { get; set; }
+
         public override string ToString()
         {
             return $"{Keyword}";

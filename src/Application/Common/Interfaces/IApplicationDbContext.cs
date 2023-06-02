@@ -21,6 +21,7 @@ public interface IApplicationDbContext
     DbSet<Folder> Folders { get; set; }
     DbSet<Image> Images { get; set; }
     DbSet<Sample> Samples { get; set; }
+    DbSet<Tag> Tags { get; set; }
     ChangeTracker ChangeTracker { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

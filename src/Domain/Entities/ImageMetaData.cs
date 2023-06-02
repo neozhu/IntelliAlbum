@@ -49,15 +49,17 @@ public class ImageMetaData
     public DateTime? FaceDetectLastUpdated { get; set; }
     public DateTime? FaceRecognizeLastUpdated { get; set; }
 
-    public virtual List<DirectoryBase>? EXIFData { get; set; }
+    //public virtual List<DirectoryBase>? EXIFData { get; set; }
 
     public string? MimeType { get; set; }
     public string? FileType { get; set; }
     public string? Category { get; set; }
     public string? City { get; set; }
+
+    public string? TagKeywords { get; set; }
     public override string ToString()
     {
-        return $"{MimeType} {Category} {Caption} {Description} {City} { Copyright} {ISO} {FNum } {Exposure} {Camera?.Model} {Lens?.Model} {DateTaken}";
+        return $"{MimeType} {Category} {Caption} {Description} {City} { Copyright} {ISO} {FNum } {Exposure} {Camera?.Model} {Lens?.Model} {TagKeywords} {DateTaken}";
     }
     public string ToImageInformation()
     {

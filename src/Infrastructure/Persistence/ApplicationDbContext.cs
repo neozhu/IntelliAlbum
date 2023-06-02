@@ -37,6 +37,7 @@ public class ApplicationDbContext : IdentityDbContext<
     public DbSet<Folder> Folders { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Sample> Samples { get; set; }
+    public DbSet<Tag> Tags { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

@@ -27,7 +27,8 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
     private readonly IStatusService _statusService;
     private bool _fullIndexComplete;
     public  string RootFolder { get; set; }
-    public  bool EnableIndexing { get; set; } 
+    public  bool EnableIndexing { get; set; }
+    private List<Tag> _tags = new();
     public IndexingService(IServiceScopeFactory scopeFactory,
         //ImageCache imageCache,
         MetaDataService metaDataService,
@@ -61,7 +62,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+            var _tags = await db.Tags.ToListAsync();
             // Now, see if there's any folders that have a null scan date.
             var folders = await db.Folders.Where(x => x.FolderScanDate == null && x.ProcessStatus==0)
                 .OrderBy(x => x.Path)
@@ -324,9 +325,7 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
         foreach (var file in allImageFiles)
             try
             {
-                var dbImage = dbFolder.Images.FirstOrDefault(x =>
-                    x.Name.Equals(file.Name, StringComparison.OrdinalIgnoreCase));
-
+                var dbImage = dbFolder.Images.FirstOrDefault(x => x.Name.Equals(file.Name, StringComparison.OrdinalIgnoreCase));
                 if (dbImage != null)
                 {
                     // See if the image has changed since we last indexed it
@@ -351,12 +350,12 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
 
                 var image = dbImage;
 
-                if (image == null) image = new Image { Name = file.Name, FolderId=dbFolder.Id };
+                if (image == null) image = new Image { Name = file.Name, FolderId=dbFolder.Id , ImageTags=new List<Tag>() };
                 // Store some info about the disk file
                 image.FileSizeBytes = (int)file.Length;
                 image.FileCreationDate = file.CreationTimeUtc;
                 image.FileLastModDate = file.LastWriteTimeUtc;
-
+                 
                 image.Folder = dbFolder;
 
                 if (dbImage == null)
@@ -374,6 +373,18 @@ public class IndexingService : IProcessJobFactory, IRescanProvider
                     }
                     imagesWereAddedOrRemoved = true;
                     image.MetaData = _metaDataService.ReadImageMetaData(image);
+                    if (!string.IsNullOrEmpty(image.MetaData.TagKeywords))
+                    {
+                        var keywords = image.MetaData.TagKeywords.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        foreach(var k in keywords.Select(x=>x.Trim()))
+                        {
+                            if (!image.ImageTags?.Any(x => x.Keyword == k)??true)
+                            {
+                                var newtag = _tags.FirstOrDefault(x => x.Keyword == k) ?? new Tag() { Keyword = k };
+                                image.ImageTags.Add(newtag);
+                            }
+                        }
+                    }
                 }
                 else
                 {

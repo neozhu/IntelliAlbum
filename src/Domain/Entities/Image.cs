@@ -23,7 +23,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities
       
         public virtual Hash Hash { get; set; } = new();
         // An image can have many tags
-        public virtual List<Tag>? ImageTags { get; set; }
+        public virtual ICollection<Tag>? ImageTags { get; set; }
 
         public virtual List<ImageClassification>? Classification { get; set; }
         public DateTime? ObjectDetectLastUpdated { get; set; }

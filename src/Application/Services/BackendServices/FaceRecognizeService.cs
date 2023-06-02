@@ -23,6 +23,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
     private readonly ILogger<FaceRecognizeService> _logger;
     private readonly IStatusService _statusService;
     private readonly WorkService _workService;
+    private List<Tag> _tags { get; set; } = new();
 
     public FaceRecognizeService(IServiceScopeFactory scopeFactory,
         ImageSharpProcessor imageSharpProcessor,
@@ -58,7 +59,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
 
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+        _tags =await db.Tags.ToListAsync();
         var images = await db.Images.Where(x => x.FaceRecognizeLastUpdated == null && x.RecognizeFaceStatus == 0 && x.HasPerson == true &&
                                x.FaceDetectLastUpdated!=null && x.DetectFaceStatus==2 &&
                                x.FaceDetections != null)
@@ -78,7 +79,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+        _tags = await db.Tags.ToListAsync();
         // TODO: Abstract this once EFCore Bulkextensions work in efcore 6
         var updated = await db.Images.ExecuteUpdateAsync(x => x.SetProperty(y => y.FaceRecognizeLastUpdated, v => null)
                                                              .SetProperty(y => y.RecognizeFaceStatus, y => 0));
@@ -90,7 +91,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+        _tags = await db.Tags.ToListAsync();
         var updated = await db.Images.Where(x => x.FolderId == folderId)
                                      .ExecuteUpdateAsync(x => x.SetProperty(y => y.FaceRecognizeLastUpdated, v => null)
                                                               .SetProperty(y => y.RecognizeFaceStatus, y => 0));
@@ -103,7 +104,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+        _tags = await db.Tags.ToListAsync();
         var imageIdList = string.Join(",", imageIds);
         //var sql = $"Update imagemetadata Set ThumbLastUpdated = null where imageid in ({imageIdList})";
         // TODO: Abstract this once EFCore Bulkextensions work in efcore 6
@@ -187,7 +188,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+        _tags = await db.Tags.ToListAsync();
         _logger.LogDebug("Starting face recognize scan...");
 
         var complete = false;
@@ -274,7 +275,7 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-        var image = await db.Images.Where(x => x.Id == imageId).Include(x => x.Folder).FirstAsync();
+        var image = await db.Images.Where(x => x.Id == imageId).Include(x => x.Folder).Include(x=>x.ImageTags).FirstAsync();
         // Mark the image as done, so that if anything goes wrong it won't go into an infinite loop spiral
         image.FaceRecognizeLastUpdated = DateTime.UtcNow;
         if (image.MetaData is not null)
@@ -325,20 +326,20 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
                 if (image.FaceDetections?.Any() ?? false)
                 {
                     await image.FaceDetections.ExecuteInParallel(async (x) => await FaceRecognize(x), s_maxThreads);
-                    var nametag = image.FaceDetections.Where(x=>!string.IsNullOrEmpty(x.Name)).Select(x => x.Name).Distinct().Select(x=>new Tag { Keyword=x }).ToArray();
+                    var nametag = image.FaceDetections.Where(x=>!string.IsNullOrEmpty(x.Name)).Select(x => x.Name).Distinct().ToArray();
                     if(image.ImageTags is null)
                     {
                         image.ImageTags = new List<Tag>();
                     }
                     foreach(var tag in nametag)
                     {
-                        if (!image.ImageTags.Any(x => x.Keyword == tag.Keyword))
+                        if (!image.ImageTags.Any(x => x.Keyword == tag))
                         {
-                            image.ImageTags.Add(tag);
-                            
+                            var newtag = _tags.FirstOrDefault(x => x.Keyword == tag) ?? new Tag() { Keyword = tag };
+                            image.ImageTags.Add(newtag);
                         }
                     }
-                    image.Keywords = $" {image.MetaData} {string.Join(' ', image.ImageObjects.Select(x=>x.Tag?.Keyword))} {string.Join(' ', nametag.Select(x=>x.Keyword))}";
+                    image.Keywords = $" {image.MetaData} {string.Join(' ', image.ImageObjects.Select(x=>x.Tag))} {string.Join(' ', nametag)}";
                     image.RecognizeFaceStatus = 2;
                 }
             }

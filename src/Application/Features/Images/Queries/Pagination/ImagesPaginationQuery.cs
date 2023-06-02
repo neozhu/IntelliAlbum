@@ -9,7 +9,7 @@ namespace CleanArchitecture.Blazor.Application.Features.Images.Queries.Paginatio
 
 public class ImagesWithPaginationQuery : PaginationFilterBase, ICacheableRequest<PaginatedData<ImageDto>>
 {
-    [CompareTo("Name", "Comments","Keywords")] // <-- This filter will be applied to Name or Description.
+    [CompareTo("Name", "Comments", "Keywords")] // <-- This filter will be applied to Name or Description.
     [StringFilterOptions(StringFilterOption.Contains)]
     public string? Keyword { get; set; }
     [Description("Search for creation date")]

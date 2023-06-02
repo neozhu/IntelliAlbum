@@ -21,7 +21,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
     private readonly ILogger<ObjectDetectService> _logger;
     private readonly IStatusService _statusService;
     private readonly WorkService _workService;
-
+    private List<Tag> _tags=new List<Tag>();
     public ObjectDetectService(IServiceScopeFactory scopeFactory,
         ServiceSettings  serviceSettings,
         YoloAIService yoloAIService,
@@ -54,7 +54,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
 
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+        _tags =await db.Tags.ToListAsync();
         var images = await db.Images.Where(x =>x.ObjectDetectLastUpdated ==null && x.DetectObjectStatus == 0 &&
                                x.ThumbLastUpdated != null && x.ProcessThumbStatus==2 && x.MetaData!=null )
             .OrderByDescending(x => x.FileLastModDate)
@@ -73,7 +73,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+        _tags = await db.Tags.ToListAsync();
         // TODO: Abstract this once EFCore Bulkextensions work in efcore 6
         var updated = await db.Images.ExecuteUpdateAsync(x=>x.SetProperty(y=>y.ObjectDetectLastUpdated, v=>null)
                                                              .SetProperty(y => y.DetectObjectStatus, y => 0));
@@ -85,7 +85,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-
+        _tags = await db.Tags.ToListAsync();
         var updated = await db.Images.Where(x=>x.FolderId==folderId)
                                      .ExecuteUpdateAsync( x=>x.SetProperty(y=>y.ObjectDetectLastUpdated, v=>null)
                                                               .SetProperty(y => y.DetectObjectStatus, y => 0));
@@ -328,7 +328,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                     imageObjects.Add(new ImageObject()
                                     {
                                         Type= ObjectTypes.Person,
-                                        Tag=new Tag() { Keyword = obj.Name },
+                                        Tag= obj.Name ,
                                         Score = obj.Confidence,
                                         RectX = Convert.ToInt32(obj.BBox.Xmin),
                                         RectY = Convert.ToInt32(obj.BBox.Ymin),
@@ -341,7 +341,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                     imageObjects.Add(new ImageObject()
                                     {
                                         Type = ObjectTypes.Object,
-                                        Tag = new Tag() { Keyword = obj.Name },
+                                        Tag = obj.Name ,
                                         Score = obj.Confidence,
                                         RectX = Convert.ToInt32(obj.BBox.Xmin),
                                         RectY = Convert.ToInt32(obj.BBox.Ymin),
@@ -355,6 +355,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                 }
                                 if(!image.ImageTags.Any(x=>x.Keyword.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
                                 {
+                                    var newtag = _tags.FirstOrDefault(x => x.Keyword == obj.Name) ?? new Tag() { Keyword = obj.Name };
                                     image.ImageTags.Add(new Tag() { Keyword = obj.Name });
                                 }
                             }
@@ -366,7 +367,7 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                             image.DetectObjectStatus = 3;
                         }
                         image.ImageObjects = imageObjects;
-                        image.Keywords = $"{image.MetaData} {string.Join(' ', imageObjects.Select(x=>x.Tag.Keyword))}";
+                        image.Keywords = $"{image.MetaData} {string.Join(' ', imageObjects.Select(x=>x.Tag))}";
                     }
                     catch (Exception ex)
                     {
