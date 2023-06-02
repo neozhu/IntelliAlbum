@@ -283,6 +283,21 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
             image.MetaData.FaceRecognizeLastUpdated = image.FaceRecognizeLastUpdated;
         }
         await FaceRecognizeScan(image);
+        if (image.FaceDetections?.Any(x => !string.IsNullOrEmpty(x.Name))??false)
+        {
+            foreach(var face in image.FaceDetections.Where(x=> !string.IsNullOrEmpty(x.Name)))
+            {
+                var tag =await db.Tags.FirstOrDefaultAsync(x => x.Keyword == face.Name);
+                if(tag is null)
+                {
+                    tag = new Tag() { Keyword = face.Name };
+                }
+                if(!image.ImageTags?.Any(x=>x.Keyword== face.Name) ?? true)
+                {
+                    image.ImageTags.Add(tag);
+                }
+            }
+        }
         db.Images.Update(image);
         await db.SaveChangesAsync(CancellationToken.None);
     }
@@ -327,18 +342,6 @@ public class FaceRecognizeService : IProcessJobFactory, IRescanProvider
                 {
                     await image.FaceDetections.ExecuteInParallel(async (x) => await FaceRecognize(x), s_maxThreads);
                     var nametag = image.FaceDetections.Where(x=>!string.IsNullOrEmpty(x.Name)).Select(x => x.Name).Distinct().ToArray();
-                    if(image.ImageTags is null)
-                    {
-                        image.ImageTags = new List<Tag>();
-                    }
-                    foreach(var tag in nametag)
-                    {
-                        if (!image.ImageTags.Any(x => x.Keyword == tag))
-                        {
-                            var newtag = _tags.FirstOrDefault(x => x.Keyword == tag) ?? new Tag() { Keyword = tag };
-                            image.ImageTags.Add(newtag);
-                        }
-                    }
                     image.Keywords = $" {image.MetaData} {string.Join(' ', image.ImageObjects.Select(x=>x.TagKeyword))} {string.Join(' ', nametag)}";
                     image.RecognizeFaceStatus = 2;
                 }

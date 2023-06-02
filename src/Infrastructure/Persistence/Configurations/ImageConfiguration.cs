@@ -39,6 +39,7 @@ public class ImageConfiguration : IEntityTypeConfiguration<Image>
         builder.Ignore(e => e.FullPath);
         builder.Navigation(n => n.ImageTags).AutoInclude();
         builder.Navigation(n => n.MetaData).AutoInclude();
+        builder.Navigation(n => n.Folder).AutoInclude();
     }
 }
 

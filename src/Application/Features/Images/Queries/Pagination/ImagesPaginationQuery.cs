@@ -89,6 +89,7 @@ public class ImagesWithPaginationQueryHandler :
         //var data = await _context.Images.ApplyFilterWithoutPagination(request)
         //     .ProjectTo<ImageDto>(_mapper.ConfigurationProvider)
         //     .PaginatedDataAsync(request.Page, request.PerPage);
+        //return data;
         var data = await _context.Images.ApplyFilterWithoutPagination(request)
                 .PaginatedDataAsync(request.Page, request.PerPage);
         var des = _mapper.Map<IEnumerable<Image>, List<ImageDto>>(data.Items).ToArray();

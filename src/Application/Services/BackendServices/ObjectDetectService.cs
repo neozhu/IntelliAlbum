@@ -273,7 +273,8 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetService<IApplicationDbContext>();
-        var image =await db.Images.Where(x=>x.Id==imageId).Include(x=>x.Folder).FirstAsync();
+        var image =await db.Images.Where(x=>x.Id==imageId).Include(x=>x.Folder).Include(x=>x.ImageTags).FirstAsync();
+        
         // Mark the image as done, so that if anything goes wrong it won't go into an infinite loop spiral
         image.ObjectDetectLastUpdated = DateTime.UtcNow;
         if (image.MetaData is not null)
@@ -281,6 +282,21 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
             image.MetaData.ObjectDetectLastUpdated = image.ObjectDetectLastUpdated;
         }
         await ObjectDetectScan(image);
+        if (image.Classification?.Any()??false)
+        {
+            foreach(var c in image.Classification.Where(x=>x.Label!="person"))
+            {
+                if (!image.ImageTags?.Any(x => x.Keyword == c.Label) ?? true)
+                {
+                    var tag =await db.Tags.FirstOrDefaultAsync(x => x.Keyword == c.Label);
+                    if(tag is null)
+                    {
+                        tag = new Tag() { Keyword = c.Label };
+                    }
+                    image.ImageTags.Add(tag);
+                }
+            }
+        }
         db.Images.Update(image);
         await db.SaveChangesAsync(CancellationToken.None);
     }
@@ -348,11 +364,15 @@ public class ObjectDetectService : IProcessJobFactory, IRescanProvider
                                         RectHeight = Convert.ToInt32(obj.BBox.Ymax),
                                         RectWidth = Convert.ToInt32(obj.BBox.Xmax),
                                     });
-                                    if (!image.ImageTags.Any(x => x.Keyword.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
-                                    {
-                                        var newtag = _tags.FirstOrDefault(x => x.Keyword == obj.Name) ?? new Tag() { Keyword = obj.Name };
-                                        image.ImageTags.Add(newtag);
-                                    }
+                                    //if (!image.ImageTags.Any(x => x.Keyword.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
+                                    //{
+                                    //    var newtag = _tags.FirstOrDefault(x => x.Keyword == obj.Name);
+                                    //    if(newtag is null)
+                                    //    {
+                                    //        newtag = new Tag() { Keyword = obj.Name };
+                                    //    }
+                                    //    image.ImageTags.Add(newtag);
+                                    //}
                                 }
                                 if(!image.Classification.Any(x=>x.Label.Equals(obj.Name, StringComparison.CurrentCultureIgnoreCase)))
                                 {

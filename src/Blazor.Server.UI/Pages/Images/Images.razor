@@ -204,9 +204,12 @@
                                 <MudAvatarGroup>
                                     @foreach (var face in context.Item.FaceDetections)
                                     {
-                                        <MudAvatar>
-                                            <MudImage Src="@($"./thumbs/_FaceThumbs/{face.FileName}")"></MudImage>
+                                  
+                                              <MudAvatar>
+                                            <MudImage Src="@($"./thumbs/_FaceThumbs/{face.FileName}")" Alt="@face.Name"></MudImage>
                                         </MudAvatar>
+                   
+                                      
                                     }
                                 </MudAvatarGroup>
                             }
