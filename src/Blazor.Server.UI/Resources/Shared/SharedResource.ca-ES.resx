@@ -183,4 +183,7 @@
   <data name="sign in" xml:space="preserve">
     <value>Iniciar sessió</value>
   </data>
+  <data name="Intelli Album" xml:space="preserve">
+    <value>Intelli Album</value>
+  </data>
 </root>

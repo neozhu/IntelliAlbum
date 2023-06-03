@@ -189,4 +189,13 @@
   <data name="User Profile" xml:space="preserve">
     <value>User Profile</value>
   </data>
+  <data name="Intelli Album" xml:space="preserve">
+    <value>Intelli Album</value>
+  </data>
+  <data name="Intelligent Photo Album Management" xml:space="preserve">
+    <value>Intelligent Photo Album Management</value>
+  </data>
+  <data name="Our product addresses a key issue in photo management: categorization and search. Users can search for photos using keywords such as object type, date, shooting device, or specific individuals. Our system automatically categorizes and tags photos, enabling users to quickly find the photos they need without the time-consuming and laborious task of manual organization." xml:space="preserve">
+    <value>Our product addresses a key issue in photo management: categorization and search. Users can search for photos using keywords such as object type, date, shooting device, or specific individuals. Our system automatically categorizes and tags photos, enabling users to quickly find the photos they need without the time-consuming and laborious task of manual organization.</value>
+  </data>
 </root>

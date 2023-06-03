@@ -183,4 +183,10 @@
   <data name="Multi-Tenant" xml:space="preserve">
     <value>Multi-Tenant</value>
   </data>
+  <data name="Images" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="Samples" xml:space="preserve">
+    <value>Samples</value>
+  </data>
 </root>

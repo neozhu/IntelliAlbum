@@ -183,4 +183,10 @@
   <data name="Users" xml:space="preserve">
     <value>系统账号</value>
   </data>
+  <data name="Images" xml:space="preserve">
+    <value>图片</value>
+  </data>
+  <data name="Samples" xml:space="preserve">
+    <value>样张</value>
+  </data>
 </root>
