@@ -1,0 +1,7 @@
+﻿﻿.image-card:hover {
+    transform: scale(1.10);
+   
+}
+﻿.image-card {
+    width:200px;
+}

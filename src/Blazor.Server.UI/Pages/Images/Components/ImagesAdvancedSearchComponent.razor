@@ -1,0 +1,94 @@
+﻿@using CleanArchitecture.Blazor.Application.BackendServices;
+@using CleanArchitecture.Blazor.Application.Features.Images.Queries.Pagination
+@inject IStringLocalizer<Images> L
+@inherits MudComponentBase
+<MudExpansionPanel @bind-IsExpanded="_advancedSearchExpanded"
+                   Class="mud-elevation-25 pa-2 mb-3" Text="@ConstantString.AdvancedSearch">
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudSelect T="int?" Label="@L[TRequest.GetMemberDescription(x=>x.FolderId)]" AnchorOrigin="Origin.BottomCenter" Clearable="true" ValueChanged="FolderValueChanged">
+                @if (Folders?.Any() ?? false)
+                {
+                    @foreach (var f in Folders)
+                    {
+                        <MudSelectItem T="int?" Value="@f.Id">@($"{f.Name} ({f.MetaData.ImageCount})") </MudSelectItem>
+                    }
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4"> 
+            <MudDateRangePicker @ref="@_picker1" Label="@L[TRequest.GetMemberDescription(x=>x.FileCreationDate)]" DateRangeChanged="OnDateRangeChanged1">
+                <PickerActions>
+                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _picker1.Clear())">Clear</MudButton>
+                    <MudButton OnClick="@(() => _picker1.Close(false))">Cancel</MudButton>
+                    <MudButton Color="Color.Primary" OnClick="@(() => _picker1.Close())">Ok</MudButton>
+                </PickerActions>
+            </MudDateRangePicker>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudDateRangePicker @ref="@_picker2" Label="@L[TRequest.GetMemberDescription(x=>x.RecentlyViewDatetime)]" DateRangeChanged="OnDateRangeChanged2">
+                <PickerActions>
+                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _picker2.Clear())">Clear</MudButton>
+                    <MudButton OnClick="@(() => _picker2.Close(false))">Cancel</MudButton>
+                    <MudButton Color="Color.Primary" OnClick="@(() => _picker2.Close())">Ok</MudButton>
+                </PickerActions>
+            </MudDateRangePicker>
+        </MudItem>
+    </MudGrid>
+</MudExpansionPanel>
+
+@code {
+    [EditorRequired][Parameter] public ImagesWithPaginationQuery TRequest { get; set; } = null!;
+    [EditorRequired][Parameter] public EventCallback<string> OnConditionChanged { get; set; }
+    private MudDateRangePicker _picker1;
+    private MudDateRangePicker _picker2;
+    [Inject]
+    private IFolderService _folderService { get; set; }
+    private bool _advancedSearchExpanded;
+    private ICollection<Folder> Folders { get; set; }
+    private async Task TextChanged(string str)
+    {
+        if (_advancedSearchExpanded)
+        {
+            await OnConditionChanged.InvokeAsync(str);
+        }
+    }
+    protected  override async Task OnInitializedAsync()
+    {
+        await  base.OnInitializedAsync();
+        _folderService.OnChange += OnChange;
+        Folders =await _folderService.GetFolders();
+    }
+    protected void Dispose()
+    {
+        _folderService.OnChange -= OnChange;
+    }
+    private async void OnChange()
+    {
+        Folders = await _folderService.GetFolders();
+    }
+    private async Task FolderValueChanged(int? x)
+    {
+        TRequest.FolderId = x;
+        if (_advancedSearchExpanded)
+        {
+            await OnConditionChanged.InvokeAsync("");
+        }
+    }
+    private async Task OnDateRangeChanged1(DateRange dateRange)
+    {
+        TRequest.FileCreationDate = new AutoFilterer.Types.Range<DateTime>(dateRange?.Start, dateRange?.End);
+        if (_advancedSearchExpanded)
+        {
+            await OnConditionChanged.InvokeAsync(dateRange?.ToString());
+        }
+    }
+    private async Task OnDateRangeChanged2(DateRange dateRange)
+    {
+        TRequest.RecentlyViewDatetime = new AutoFilterer.Types.Range<DateTime>(dateRange?.Start, dateRange?.End);
+        if (_advancedSearchExpanded)
+        {
+            await OnConditionChanged.InvokeAsync(dateRange?.ToString());
+        }
+    }
+}

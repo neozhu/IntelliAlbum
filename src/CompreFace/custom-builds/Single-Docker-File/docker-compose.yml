@@ -1,0 +1,30 @@
+version: '3.4'
+
+volumes:
+  postgres-data3:
+
+services:
+  compreface-postgres-db:
+    image: postgres:11.5
+    restart: always
+    container_name: "compreface-postgres-db"
+    environment:
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=testdb
+    volumes:
+      - postgres-data3:/var/lib/postgresql/data
+
+  compreface:
+    image: exadel/compreface
+    restart: always
+    container_name: "compreface"
+    ports:
+      - "8000:80"
+    environment:
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_URL=jdbc:postgresql://compreface-postgres-db:5432/testdb
+      - EXTERNAL_DB=true
+    depends_on:
+      - compreface-postgres-db

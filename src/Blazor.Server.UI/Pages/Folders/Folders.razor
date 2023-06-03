@@ -1,0 +1,174 @@
+﻿@page "/pages/Folders"
+
+@using BlazorDownloadFile
+@using CleanArchitecture.Blazor.Application.Features.Folders.Caching
+@using CleanArchitecture.Blazor.Application.Features.Folders.DTOs
+@using CleanArchitecture.Blazor.Application.Features.Folders.Queries.Pagination
+
+
+@inject IJSRuntime JS
+@inject IStringLocalizer<Folders> L
+@attribute [Authorize(Policy = Permissions.Folders.View)]
+<PageTitle>@Title</PageTitle>
+<style>
+    .mud-table-toolbar {
+        height: 120px !important;
+    }
+</style>
+
+<ErrorBoundary>
+    <ChildContent>
+        <MudDataGrid ServerData="@(ServerReload)"
+                     FixedHeader="true"
+                     FixedFooter="true"
+                     Virtualize="true"
+                     @bind-RowsPerPage="_defaultPageSize"
+                     Height="calc(100vh - 330px)"
+                     Loading="@_loading"
+                     MultiSelection="true"
+                     @bind-SelectedItems="_selectedItems"
+                     @bind-SelectedItem="_currentDto"
+                     Hover="true" @ref="_table">
+            <ToolBarContent>
+                <div class="d-flex align-start flex-grow-1">
+                    <div class="d-flex gap-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Window" Size="Size.Large" />
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.caption">@Title</MudText>
+                            <MudEnumSelect Style="min-width:120px" TEnum="FolderListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
+                            </MudEnumSelect>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1" />
+
+                    <div class="d-flex flex-column justify-end">
+                        <div class="d-flex">
+                            <MudButton DisableElevation Variant="Variant.Outlined"
+                                       Size="Size.Small"
+                                       Disabled="@_loading"
+                                       OnClick="@(()=>OnRefresh())"
+                                       StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Primary"
+                                       Style="margin-right: 4px; margin-bottom:4px">@ConstantString.Refresh</MudButton>
+
+
+
+                        </div>
+                        @if (_canSearch)
+                        {
+                            <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Value="@Query.Keyword" Placeholder="@ConstantString.Search" Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"></MudTextField>
+                        }
+
+                    </div>
+                </div>
+            </ToolBarContent>
+            <Columns>
+                <SelectColumn ShowInFooter="false"></SelectColumn>
+                <PropertyColumn Property="x => x.Name" Title="@L[_currentDto.GetMemberDescription(x=>x.Name)]">
+                    <CellTemplate>
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.body2">@context.Item.Name</MudText>
+                        </div>
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.Path" Title="@L[_currentDto.GetMemberDescription(x=>x.Path)]" />
+                <PropertyColumn Property="x => x.ParentId" Title="@L[_currentDto.GetMemberDescription(x=>x.ParentId)]" />
+                <PropertyColumn Property="x => x.FolderScanDate" Title="@L[_currentDto.GetMemberDescription(x=>x.FolderScanDate)]" />
+                <PropertyColumn Property="x => x.MetaData" Title="@L[_currentDto.GetMemberDescription(x=>x.MetaData)]" />
+
+            </Columns>
+            <NoRecordsContent>
+                <MudText>@ConstantString.NoRecords</MudText>
+            </NoRecordsContent>
+            <LoadingContent>
+                <MudText>@ConstantString.Loading</MudText>
+            </LoadingContent>
+            <PagerContent>
+                <MudDataGridPager PageSizeOptions="@(new int[]{10,15,30,50,100,500,1000})" />
+            </PagerContent>
+        </MudDataGrid>
+    </ChildContent>
+    <ErrorContent>
+        <CustomError Exception="context"></CustomError>
+    </ErrorContent>
+</ErrorBoundary>
+
+
+@code {
+    public string? Title { get; private set; }
+    private int _defaultPageSize = 15;
+    private HashSet<FolderDto> _selectedItems = new HashSet<FolderDto>();
+    private MudDataGrid<FolderDto> _table = default!;
+    private FolderDto _currentDto = new();
+    private bool _loading;
+    private bool _uploading;
+    private bool _downloading;
+    private bool _exporting;
+    [Inject]
+    private IMediator Mediator { get; set; } = default!;
+    [Inject]
+    private IMapper Mapper { get; set; } = default!;
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private FoldersWithPaginationQuery Query { get; set; } = new();
+    [Inject]
+    private IBlazorDownloadFileService BlazorDownloadFileService { get; set; } = null!;
+    private bool _canSearch;
+    private bool _canCreate;
+    private bool _canEdit;
+    private bool _canDelete;
+    private bool _canImport;
+    private bool _canExport;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Title = L[_currentDto.GetClassDescription()];
+        var state = await AuthState;
+        _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Folders.Create)).Succeeded;
+        _canSearch = (await AuthService.AuthorizeAsync(state.User, Permissions.Folders.Search)).Succeeded;
+        _canEdit = (await AuthService.AuthorizeAsync(state.User, Permissions.Folders.Edit)).Succeeded;
+        _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Folders.Delete)).Succeeded;
+        _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Folders.Import)).Succeeded;
+        _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Folders.Export)).Succeeded;
+    }
+    private async Task<GridData<FolderDto>> ServerReload(GridState<FolderDto> state)
+    {
+        try
+        {
+            _loading = true;
+            Query.Sort = state.SortDefinitions.FirstOrDefault()?.SortBy ?? "Id";
+            Query.SortBy = (state.SortDefinitions.FirstOrDefault()?.Descending ?? true ? AutoFilterer.Enums.Sorting.Descending : AutoFilterer.Enums.Sorting.Ascending);
+            Query.Page = state.Page + 1;
+            Query.PerPage = state.PageSize;
+            var result = await Mediator.Send(Query).ConfigureAwait(false);
+            return new GridData<FolderDto>() { TotalItems = result.TotalItems, Items = result.Items };
+        }
+        finally
+        {
+            _loading = false;
+        }
+
+    }
+    private async Task OnSearch(string text)
+    {
+        _selectedItems = new();
+        Query.Keyword = text;
+        await _table.ReloadServerData();
+    }
+    private async Task OnChangedListView(FolderListView listview)
+    {
+        Query.ListView = listview;
+        await _table.ReloadServerData();
+    }
+    private async Task OnRefresh()
+    {
+        FolderCacheKey.Refresh();
+        _selectedItems = new();
+        Query.Keyword = string.Empty;
+        await _table.ReloadServerData();
+    }
+
+     
+
+}

@@ -1,0 +1,250 @@
+﻿@using CleanArchitecture.Blazor.Application.Features.Samples.Commands.AddEdit
+@using Image = SixLabors.ImageSharp.Image;
+@using SixLabors.ImageSharp;
+@using SixLabors.ImageSharp.Formats.Jpeg;
+@using SixLabors.ImageSharp.Processing;
+@using ResizeMode = SixLabors.ImageSharp.Processing.ResizeMode
+@using Severity = MudBlazor.Severity
+@using Size = SixLabors.ImageSharp.Size
+@using Color = MudBlazor.Color
+@inject IJSRuntime JS
+@inherits MudComponentBase
+@inject IStringLocalizer<Samples> L
+
+<MudDialog>
+    <DialogContent>
+        <MudForm Model="@model" @ref="@_form" Validation="@(_modelValidator.ValidateValue)">
+            <MudGrid>
+                @*TODO: define mudform that should be edit fields, for example:*@
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.Name)]" @bind-Value="model.Name" For="@(() => model.Name)" Required="true" RequiredError="@L["name is required!"]"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.Description)]"  For="@(() => model.Description)" @bind-Value="model.Description"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudSlider T="float" @bind-Value="model.Threshold" Min="0" Max="1" Step="0.1f">@L[model.GetMemberDescription(x=>x.Threshold)]: @model.Threshold.ToString("F1")</MudSlider>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.Result)]" @bind-Value="model.Result" For="@(() => model.Result)" ReadOnly></MudTextField>
+                 </MudItem>
+                 <MudItem>
+                     <div class="d-flex flex-row gap-4 mb-2">
+                         <MudFileUpload T="IReadOnlyList<IBrowserFile>" Multiple
+                                        SuppressOnChangeWhenInvalid="true"
+                         @bind-Files="model.UploadPictures" OnFilesChanged="UploadFiles" For="@(() => model.UploadPictures)">
+                             <ButtonTemplate>
+                                 <MudLoadingButton Loading="@_uploading" HtmlTag="label" Disabled="_uploading"
+                                                   Variant="Variant.Filled"
+                                                   Color="Color.Primary"
+                                                   for="@context">
+                                     @(L["Upload picture"])
+                                </MudLoadingButton>
+                            </ButtonTemplate>
+                        </MudFileUpload>
+                    </div>
+                    <MudText Typo="Typo.body2">@L["The recommended size for uploading images is 640X320"]</MudText>
+                    <div class="d-fex">
+                        @if (model.SampleImages is not null)
+                        {
+                            foreach (var img in model.SampleImages)
+                            {
+                                <div style="float:left; position: relative; width: 180px; height: 100px; margin: 10px;">
+                                    <MudTooltip Delay="500" Text="@img.Name">
+                                        <MudImage ObjectFit="ObjectFit.Cover" Height="100" Width="180" Src="@img.Url" Alt="@img.Name" Elevation="25" Class="mr-2 rounded-lg" />
+                                    </MudTooltip>
+                                    <div style="position: absolute;top: 0px;left: 0px; z-index: 2990;">
+                                        <MudIconButton OnClick="@(() => PreviewImage(img.Url, model.SampleImages))" Icon="@Icons.Material.Filled.Image" aria-label="preview" Color="Color.Info" Size="MudBlazor.Size.Small"></MudIconButton>
+                                    </div>
+                                    <div style="position: absolute;top: 0px;right: 0px; z-index: 2990;">
+                                        <MudIconButton OnClick="@(() => DeleteImage(img))" Icon="@Icons.Material.Filled.Delete" aria-label="delete" Color="Color.Error" Size="MudBlazor.Size.Small"></MudIconButton>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@ConstantString.Cancel</MudButton>
+        <MudLoadingButton Loading="@_saving" OnClick="SaveAndNew">@ConstantString.SaveAndNew</MudLoadingButton>
+        <MudButton Loading="@_saving" Color="MudBlazor.Color.Primary" OnClick="Submit">@ConstantString.Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    MudForm? _form;
+    private bool _uploading = false;
+    private bool _saving = false;
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+    AddEditSampleCommandValidator _modelValidator = new();
+    [EditorRequired][Parameter] public AddEditSampleCommand model { get; set; } = null!;
+    [Inject] private IMediator _mediator { get; set; } = default!;
+    [Inject]
+    private IUploadService UploadService { get; set; } = default!;
+    private async Task DeleteImage(SampleImage picture)
+    {
+        if (model.SampleImages != null)
+        {
+            var parameters = new DialogParameters
+            {
+                { nameof(ConfirmationDialog.ContentText), $"{L["Are you sure you want to erase this image?"]}" }
+            };
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true, DisableBackdropClick = true };
+            var dialog = DialogService.Show<ConfirmationDialog>($"{L["Erase imatge"]}", parameters, options);
+            var state = await dialog.Result;
+
+            if (!state.Canceled)
+            {
+                model.SampleImages.Remove(picture);
+            }
+        }
+    }
+
+    private async Task PreviewImage(string url, IEnumerable<SampleImage> images)
+    {
+        await JS.InvokeVoidAsync("previewImage", url, images.Select(x => x.Url).ToArray());
+    }
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            _uploading = true;
+            var list = new List<SampleImage>();
+            foreach (var file in e.GetMultipleFiles())
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(model.Name))
+                    {
+                        model.Name = Path.GetFileNameWithoutExtension(file.Name);
+                    }
+                    var filestream = file.OpenReadStream(GlobalVariable.MaxAllowedSize);
+                    var imgStream = new MemoryStream();
+                    await filestream.CopyToAsync(imgStream);
+                    imgStream.Position = 0;
+                    var image = Image.Load(imgStream);
+                    var outStream = createThumbnail(image);
+                    var filename = file.Name;
+                    var fi = new FileInfo(filename);
+                    var ext = ".jpg";
+                    var result = await UploadService.UploadAsync(new UploadRequest(Guid.NewGuid() + ext, UploadType.Sample, outStream.ToArray()));
+                    list.Add(new SampleImage { Name = filename, Size = outStream.Length, Url = result });
+
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"{ex.Message}", MudBlazor.Severity.Error);
+                }
+            }
+            Snackbar.Add(L["Upload pictures successfully"], MudBlazor.Severity.Info);
+
+            if (model.SampleImages is null)
+                model.SampleImages = list;
+            else
+                model.SampleImages.AddRange(list);
+        }
+        finally
+        {
+            _uploading = false;
+        }
+    }
+
+    async Task Submit()
+    {
+        try
+        {
+            _saving = true;
+            await _form!.Validate().ConfigureAwait(false);
+            if (!_form!.IsValid)
+                return;
+            var result = await _mediator.Send(model);
+            if (result.Succeeded)
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+                Snackbar.Add(ConstantString.SaveSuccess, MudBlazor.Severity.Info);
+            }
+            else
+            {
+                Snackbar.Add(result.ErrorMessage, MudBlazor.Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+    async Task SaveAndNew()
+    {
+        try
+        {
+            _saving = true;
+            await _form!.Validate().ConfigureAwait(false);
+            if (!_form!.IsValid)
+                return;
+            var result = await _mediator.Send(model);
+            if (result.Succeeded)
+            {
+                Snackbar.Add(ConstantString.SaveSuccess, MudBlazor.Severity.Info);
+                await Task.Delay(300);
+                model = new AddEditSampleCommand() { };
+            }
+            else
+            {
+                Snackbar.Add(result.ErrorMessage, MudBlazor.Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+    void Cancel() => MudDialog.Cancel();
+
+    private MemoryStream createThumbnail(Image originalImage)
+    {
+        int targetSize = 640;
+
+        if (originalImage.Width <= targetSize && originalImage.Height <= targetSize)
+        {
+            // 图片小于或等于目标尺寸，不需要缩放
+            var stream = new MemoryStream();
+            originalImage.Save(stream, new JpegEncoder()); // 根据需要选择合适的编码器
+            stream.Position = 0;
+            return stream;
+        }
+
+        int newWidth;
+        int newHeight;
+
+        if (originalImage.Width > originalImage.Height)
+        {
+            // 宽度大于高度的情况
+            newWidth = targetSize;
+            newHeight = (int)(((float)originalImage.Height / originalImage.Width) * targetSize);
+        }
+        else
+        {
+            // 高度大于等于宽度的情况
+            newHeight = targetSize;
+            newWidth = (int)(((float)originalImage.Width / originalImage.Height) * targetSize);
+        }
+
+        var resizeOptions = new ResizeOptions
+            {
+                Size = new Size(newWidth, newHeight),
+                Mode = ResizeMode.Max
+            };
+
+        using (var thumbnail = originalImage.Clone(ctx => ctx.Resize(resizeOptions)))
+        {
+            var stream = new MemoryStream();
+            thumbnail.Save(stream, new JpegEncoder()); // 根据需要选择合适的编码器
+            stream.Position = 0;
+            return stream;
+        }
+    }
+}

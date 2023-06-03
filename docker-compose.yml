@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  dashboard:
+    image: ${DOCKER_REGISTRY-}blazorserver
+    container_name: "blazorapp"
+    build:
+      context: .
+      dockerfile: src/Blazor.Server.UI/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - UseInMemoryDatabase=false
+      #- DatabaseSettings__DBProvider=mssql
+      #- DatabaseSettings__ConnectionString=Server=sqldb;Database=BlazorDashboardDb;User=sa;Password=Password@123;MultipleActiveResultSets=true;Encrypt=false;TrustServerCertificate=true
+      - DatabaseSettings__DBProvider=postgresql
+      - DatabaseSettings__ConnectionString=Server=postgresdb;Database=BlazorDashboardDb;User Id=postgres;Password=postgrespw;
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=mypassword@123
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/blazorapp.pfx
+    volumes:
+     - ${APPDATA}\microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+     - ${USERPROFILE}\.aspnet\https:/root/.aspnet/https:ro
+    ports:
+      - "5000:80"
+      - "5001:443"
+    depends_on:
+      - sqldb
+      - postgresdb
+    restart: on-failure
+
+  sqldb:
+    image: "mcr.microsoft.com/mssql/server:2019-latest"
+    environment:
+      - "SA_PASSWORD=Password@123"
+      - "ACCEPT_EULA=Y"
+      - MSSQL_DATA_DIR=/var/opt/mssql/data
+      - MSSQL_LOG_DIR=/var/opt/mssql/log
+      - MSSQL_BACKUP_DIR=/var/opt/mssql/backup
+    volumes:
+      - ${USERPROFILE}\mssql_data:/var/opt/mssql/data
+      - ${USERPROFILE}\mssql_log:/var/opt/mssql/log
+      - ${USERPROFILE}\mssql_backup:/var/opt/mssql/backup
+  postgresdb:
+    image: "postgres:latest"
+    restart: always
+    container_name: "postgresdb"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgrespw
+      - POSTGRES_DB=BlazorDashboardDb
+    volumes:
+      - ${USERPROFILE}\postgres_data:/var/lib/postgresql/data
+volumes:
+  mssql_data:
+  mssql_log:
+  mssql_backup:
+  postgres_data:

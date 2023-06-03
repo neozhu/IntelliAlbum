@@ -1,0 +1,195 @@
+@page "/"
+@using CleanArchitecture.Blazor.Application.Features.Images.DTOs;
+@using CleanArchitecture.Blazor.Application.Features.Images.Queries.Pagination;
+@using MudBlazor.Utilities
+@using Blazor.Server.UI.Models
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
+<PageTitle>@Title</PageTitle>
+<style>
+    .lp-app-grid {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+    }
+</style>
+<MudContainer MaxWidth="MaxWidth.Large">
+    <LandingSection StraightEnd="true" SectionClass="dark-section-text" BackgroundClass="mud-dark">
+        <MudGrid>
+            <MudItem xs="12" sm="12" md="6">
+                <MudText Typo="Typo.h6" Color="Color.Primary">@L["Intelli Album"]</MudText>
+                <MudText Typo="Typo.h5" Class="mud-text-disabled">@L["Intelligent Photo Album Management"]</MudText>
+                <MudText Typo="Typo.subtitle1" Class="my-4">
+                    @L["Our product addresses a key issue in photo management: categorization and search. Users can search for photos using keywords such as object type, date, shooting device, or specific individuals. Our system automatically categorizes and tags photos, enabling users to quickly find the photos they need without the time-consuming and laborious task of manual organization."]
+                </MudText>
+            </MudItem>
+            <MudItem Class="world-map-item" xs="12" sm="12" md="6">
+                <div class="world-map">
+                    <WorldMap />
+                </div>
+            </MudItem>
+            <MudItem xs="12" sm="12">
+                <MudPaper Elevation="3">
+                    <div class="d-flex flex-row align-content-center align-center">
+                        <MudTextField T="string" Value="@keyword" ValueChanged="KeywordValueChanged" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"></MudTextField>
+                        <MudButtonGroup>
+                            <MudTooltip Text="@L["Small"]">
+                                <MudIconButton Icon="@Icons.Material.Filled.ViewCompact" OnClick="OnSmall" aria-label="small"></MudIconButton>
+                            </MudTooltip>
+                            <MudTooltip Text="@L["Medium"]">
+                                <MudIconButton Icon="@Icons.Material.Filled.ViewModule" OnClick="OnMedium" aria-label="Medium"></MudIconButton>
+                            </MudTooltip>
+                            <MudTooltip Text="@L["Large"]">
+                                <MudIconButton Icon="@Icons.Material.Filled.GridView" OnClick="OnLarge" aria-label="Large"></MudIconButton>
+                            </MudTooltip>
+                        </MudButtonGroup>
+                    </div>
+                </MudPaper>
+
+            </MudItem>
+            <MudItem md="4" sm="12">
+                <MudText>information</MudText>
+            </MudItem>
+            <MudItem md="8" sm="12">
+                <div class="d-flex flex-row align-content-end align-end">
+                    <MudEnumSelect Style="min-width:120px" FullWidth="false" TEnum="ImageListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
+                    </MudEnumSelect>
+                    <MudSelect T="int" Value="@pagesize" Label="@L["Rows per page"]" FullWidth="false" Style="min-width:100px" ValueChanged="PageSizeValueChanged">
+                        <MudSelectItem Value="10">10</MudSelectItem>
+                        <MudSelectItem Value="25">25</MudSelectItem>
+                        <MudSelectItem Value="50">50</MudSelectItem>
+                        <MudSelectItem Value="100">100</MudSelectItem>
+                        <MudSelectItem Value="1000">1000</MudSelectItem>
+                    </MudSelect>
+                    <MudPagination SelectedChanged="PageChanged" Selected="@currentPage" Size="Size.Small" Variant="Variant.Filled" Count="@((totalitems + pagesize - 1) / pagesize)" />
+                </div>
+            </MudItem>
+        </MudGrid>
+        @if (searching)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-2" />
+        }
+        else
+        {
+            if (images.Any())
+            {
+                <MudGrid>
+                    @foreach (var img in images)
+                    {
+                        <MudItem lg="@xs" sm="@(getsm())" md="@(getmd())" xs="12">
+                            <ImageCard Image="@img" ThumbSize="@thumbSize" OnPreview="OnPreview"></ImageCard>
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+            else
+            {
+                <MudText>@L["Sorry, there are no images to display."]</MudText>
+            }
+
+        }
+
+    </LandingSection>
+</MudContainer>
+
+@code {
+    public string Title { get; set; } = "Dashboard";
+    private int xs = 2;
+    private int pagesize = 50;
+    private int currentPage = 1;
+    private int totalitems = 52;
+    private ThumbSize thumbSize { get; set; } = ThumbSize.Small;
+    private string keyword = "";
+    private ImageListView listview { get; set; } = ImageListView.All;
+    [Inject]
+    private IMediator Mediator { get; set; } = default!;
+    private ImagesWithPaginationQuery Query { get; set; } = new();
+    private List<ImageDto> images { get; set; } = new();
+    private bool searching = false;
+    protected override async Task OnInitializedAsync()
+    {
+        await searchImage();
+    }
+    private int getsm()
+    {
+        return thumbSize switch
+        {
+            ThumbSize.Small => 6,
+            ThumbSize.Medium => 6,
+            ThumbSize.Large => 12,
+            _ => 12
+        };
+    }
+    private int getmd()
+    {
+        return thumbSize switch
+        {
+            ThumbSize.Small => 4,
+            ThumbSize.Medium => 4,
+            ThumbSize.Large => 6,
+            _ => 6
+        };
+    }
+    private async Task searchImage()
+    {
+        if (searching) return;
+        try
+        {
+            searching = true;
+            Query = new ImagesWithPaginationQuery() { Sort = "Id", SortBy = AutoFilterer.Enums.Sorting.Descending, Keyword = keyword, Page = currentPage, PerPage = pagesize, ListView = listview };
+            var result = await Mediator.Send(Query);
+            images = result.Items.ToList();
+            totalitems = result.TotalItems;
+        }
+        finally
+        {
+            searching = false;
+        }
+
+    }
+    private async Task KeywordValueChanged(string keyword)
+    {
+        this.keyword = keyword;
+        await searchImage();
+    }
+    public async void OnPreview(int imageId)
+    {
+        var index = images.FindIndex(x => x.Id == imageId);
+        var src = images.Select(x => $"/rawimage/{x.Id}").ToArray();
+        var thumbsrc = images.Select(x => $"/thumb/{thumbSize}/{x.Id}").ToArray();
+        await JS.InvokeVoidAsync("gallery", index, src, thumbsrc);
+    }
+    private async Task OnChangedListView(ImageListView view)
+    {
+        listview = view;
+        await searchImage();
+    }
+    private async Task PageChanged(int i)
+    {
+        currentPage = i;
+        await searchImage();
+    }
+    private async Task PageSizeValueChanged(int size)
+    {
+        pagesize = size;
+        await searchImage();
+    }
+    private async Task OnSmall()
+    {
+        xs = 2;
+        thumbSize = ThumbSize.Small;
+        await searchImage();
+    }
+    private async Task OnMedium()
+    {
+        xs = 3;
+        thumbSize = ThumbSize.Medium;
+        await searchImage();
+    }
+    private async Task OnLarge()
+    {
+        xs = 4;
+        thumbSize = ThumbSize.Large;
+        await searchImage();
+    }
+}

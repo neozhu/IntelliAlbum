@@ -1,0 +1,114 @@
+﻿@using CleanArchitecture.Blazor.Application.Features.Images.DTOs;
+@inject IStringLocalizer<SharedResource> L
+<MudCard Class="@className" Elevation="2">
+    <MudCardMedia Image="@(ImageUrl())" Height="getHeight()" />
+    <MudCardContent>
+        @if (Image.MetaData is not null)
+        {
+            <MudStack AlignItems="AlignItems.Start" Spacing="0" Class="mb-2">
+                <div class="mud-text-disabled" style="font-size:12px">@Image.MetaData.DateTaken</div>
+                <div class="mud-text-disabled" style="font-size:12px">@Image.MetaData.ToImageInformation()</div>
+        </MudStack>
+        }
+        @if (Image.ImageTags is not null)
+        {
+            <MudStack Row="true" Class="flex-wrap" Spacing="1">
+                @foreach (var tag in Image.ImageTags.Where(x => !string.IsNullOrEmpty(x.Keyword)))
+                {
+                    <MudChip Class="ma-0" Size="Size.Small">@tag.Keyword</MudChip>
+                }
+            </MudStack>
+        }
+       
+       
+        @if (_showMore && Image.MetaData is not null)
+        {
+            <div class="d-flex flex-column flex-wrap my-2 gap-x-1">
+                <MudText Typo="Typo.body2">@L["Image Metadata"]</MudText>
+                @if (Image.MetaData.Camera is not null)
+                {
+                    <MudText Typo="Typo.body2">@Image.MetaData.Camera.Model</MudText>
+                }
+                @if (Image.MetaData.Lens is not null)
+                {
+                    <MudText Typo="Typo.body2">@Image.MetaData.Lens.Model</MudText>
+                }
+                @if (Image.MetaData.Caption is not null)
+                {
+                    <MudText Typo="Typo.body2">@Image.MetaData.Caption</MudText>
+                }
+                @if (Image.MetaData.MimeType is not null)
+                {
+                    <MudText Typo="Typo.body2">Mime Type: @Image.MetaData.MimeType</MudText>
+                }
+                @if (Image.MetaData.ISO is not null)
+                {
+                    <MudText Typo="Typo.body2">ISO: @Image.MetaData.ISO</MudText>
+                }
+                <MudRating Size="Size.Small" SelectedValue="@Image.MetaData.Rating" />
+            </div>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudTooltip Text="@L["Preview"]">
+            <MudIconButton Icon="@Icons.Material.Filled.Camera" OnClick="PreviewClick" Variant="Variant.Text" Color="Color.Primary"></MudIconButton>
+        </MudTooltip>
+       <MudTooltip Text="@L["Select"]">
+        <MudIconButton Icon="@Icons.Material.Filled.ShoppingCartCheckout" Variant="Variant.Text" Color="Color.Primary"></MudIconButton>
+        </MudTooltip>
+        <MudTooltip Text="@L["More"]">
+            <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" Variant="Variant.Text" OnClick="@(()=>_showMore=!_showMore)" Color="Color.Primary"></MudIconButton>
+        </MudTooltip>
+    </MudCardActions>
+</MudCard>
+@code {
+    private string className => "image-card";
+    [Parameter]
+    [EditorRequired]
+    public ImageDto Image { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public ThumbSize ThumbSize { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public EventCallback<int> OnPreview { get; set; }
+    private bool _showMore = false;
+
+    public string ImageUrl()
+    {
+        var extension = new FileInfo(Image.Name).Extension;
+        var baseName = Path.GetFileNameWithoutExtension(Image.Name);
+        var thumbFileName = $"{baseName}_{GetSizePostFix(ThumbSize)}{extension}";
+        return $"./thumbs/{thumbFileName}";
+    }
+    private int getHeight()
+    {
+        return ThumbSize switch
+        {
+            ThumbSize.ExtraLarge => 500,
+            ThumbSize.Large => 430,
+            ThumbSize.Big => 400,
+            ThumbSize.Medium => 300,
+            ThumbSize.Small => 180,
+            _ => 180
+        };
+    }
+    private async Task PreviewClick()
+    {
+        await OnPreview.InvokeAsync(Image.Id);
+    }
+    private string GetSizePostFix(ThumbSize size)
+    {
+        return size switch
+        {
+            ThumbSize.ExtraLarge => "xl",
+            ThumbSize.Large => "l",
+            ThumbSize.Big => "b",
+            ThumbSize.Medium => "m",
+            ThumbSize.Small => "s",
+            _ => "PREVIEW"
+        };
+    }
+
+
+}
