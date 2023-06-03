@@ -4,6 +4,7 @@ IntelliAlbum is an application designed specifically for photo studios and photo
 
 ### Architecture
 ![architecture](./doc/architecture.png)
+[![Demo](./doc/youtube.png)](https://www.youtube.com/watch?v=_ZWo40zjfbQ)
 
 ## Technologies
 - Visual Studio.net 2022

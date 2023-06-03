@@ -5,6 +5,7 @@
 
 ### 系统架构
 ![architecture](./doc/architecture.png)
+[![Demo](./doc/youtube.png)](https://www.youtube.com/watch?v=_ZWo40zjfbQ)
 ## 技术
 - Visual Studio.net 2022
 - .Net 7.0
