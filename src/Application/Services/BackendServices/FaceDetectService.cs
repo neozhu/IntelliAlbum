@@ -306,16 +306,16 @@ public class FaceDetectService : IProcessJobFactory, IRescanProvider
                     var watch = new Stopwatch("FaceDetect", 60000);
                     try
                     {
-                        var result = await _faceAIService.DetectFace(imagePath);
+                        var result = await _faceAIService.DetectFace(thumbImagePath);
 
                         if (result.Result?.Any() ?? false)
                         {
                             image.DetectFaceStatus = 2;
                             imageDetections = new List<FaceDetection>();
-                            var index = 1;
+                            var index = 0;
                             foreach (var res in result.Result)
                             {
-                                ++index;
+                                index++;
                                 var faceDir = Path.Combine(_thumbnailRootFolder, "_FaceThumbs");
                                 if (!Directory.Exists(faceDir))
                                 {

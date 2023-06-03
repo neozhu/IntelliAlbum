@@ -1,4 +1,4 @@
-## IntelliAlbum - Intelligent Photo Album Management System
+## IntelliAlbum - Intelligent Album Management With AI
 
 IntelliAlbum is an application designed specifically for photo studios and photographers to address the challenges of managing large volumes of photos and identifying the photos that clients prefer. By combining technology and artificial intelligence, this system provides a comprehensive solution that enables users to easily manage, filter, and customize photo albums.
 
