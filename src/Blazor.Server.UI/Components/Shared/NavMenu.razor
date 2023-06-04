@@ -22,7 +22,9 @@
                            OnClick="OpenCommandPalette" />
         </MudTooltip>
         <MudSpacer />
-        <MudTooltip Arrow="true"
+        @if (_canUpload)
+        {
+            <MudTooltip Arrow="true"
                     Text="Upload Images">
             <MudIconButton Class="mx-1"
                            Color="Color.Default"
@@ -30,6 +32,7 @@
                            OnClick="OnUploadImages"
                            />
         </MudTooltip>
+        }
         <MudTooltip Arrow="true"
                     Text="Navigate to GitHub">
             <MudIconButton Class="mx-1"

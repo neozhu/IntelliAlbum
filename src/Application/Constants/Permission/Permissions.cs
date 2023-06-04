@@ -35,6 +35,7 @@ public static class Permissions
     public static class Images
     {
         public const string View = "Permissions.Images.View";
+        public const string Upload = "Permissions.Images.Upload";
         public const string ReScan = "Permissions.Images.ReScan";
         public const string Create = "Permissions.Images.Create";
         public const string Edit = "Permissions.Images.Edit";
